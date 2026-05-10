@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pflegias Quiz">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#C8341A">
+<title>Pflegias Quiz</title>
+<style>
+:root{
+  --r:#C8341A;--rd:#A02810;--rl:#FEF0EC;
+  --g:#2A7A38;--gl:#E8F5EA;
+  --t:#0F0F0F;--ts:#555;--tl:#999;
+  --bg:#F5F4F0;--card:#fff;
+  --bd:#E8E5E0;--bds:#C8C4BC;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;
+  background:var(--bg);color:var(--t);font-size:16px;
+  display:flex;flex-direction:column;max-width:480px;margin:0 auto;
+}
+
+/* SCREENS */
+.sc{display:none;flex-direction:column;height:100%;position:absolute;inset:0;max-width:480px;margin:0 auto;}
+.sc.on{display:flex;}
+
+/* HEADER */
+.hd{
+  background:var(--r);
+  padding-top:calc(var(--safe-top) + 14px);
+  padding-bottom:14px;
+  padding-left:16px;padding-right:16px;
+  flex-shrink:0;
+}
+.hd-row{display:flex;align-items:center;gap:10px;}
+.bk{background:rgba(255,255,255,.18);border:none;border-radius:50%;
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:#fff;font-size:16px;flex-shrink:0;}
+.hd-title{font-size:17px;font-weight:600;color:#fff;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hd-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:1px;}
+.pbar{height:3px;background:rgba(255,255,255,.25);margin-top:10px;border-radius:2px;}
+.pfill{height:100%;background:#fff;border-radius:2px;transition:width .35s;}
+
+/* SCROLL BODY */
+.body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+
+/* HOME HERO */
+.home-hero{background:var(--r);padding:8px 16px 22px;}
+.hero-row{display:flex;align-items:center;gap:14px;}
+.hero-icon{width:56px;height:56px;background:rgba(255,255,255,.16);
+  border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:26px;flex-shrink:0;}
+.hero-text h1{font-size:22px;font-weight:700;color:#fff;}
+.hero-text p{font-size:12px;color:rgba(255,255,255,.72);margin-top:2px;}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;}
+.hstat{background:rgba(255,255,255,.15);border-radius:10px;padding:10px 6px;text-align:center;}
+.hstat-n{font-size:20px;font-weight:700;color:#fff;}
+.hstat-l{font-size:10px;color:rgba(255,255,255,.7);margin-top:1px;line-height:1.2;}
+
+/* PROGRESS RING */
+.ring-wrap{display:flex;justify-content:center;padding:16px 0 8px;}
+.ring-svg{width:100px;height:100px;}
+.ring-bg{fill:none;stroke:#E8E5E0;stroke-width:8;}
+.ring-fg{fill:none;stroke:var(--r);stroke-width:8;stroke-linecap:round;
+  transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .6s ease;}
+.ring-txt{font-size:22px;font-weight:700;fill:var(--t);}
+.ring-sub{font-size:10px;fill:var(--ts);}
+
+/* CHAPTER CARDS */
+.sec{padding:14px 14px 4px;font-size:11px;font-weight:600;color:var(--ts);
+  text-transform:uppercase;letter-spacing:.06em;}
+.cards{padding:0 14px;display:flex;flex-direction:column;gap:8px;padding-bottom:20px;}
+.ch-card{background:var(--card);border-radius:14px;border:.5px solid var(--bd);
+  overflow:hidden;cursor:pointer;transition:transform .1s;}
+.ch-card:active{transform:scale(.98);}
+.ch-top{display:flex;align-items:center;gap:12px;padding:14px 16px;}
+.ch-dot{width:44px;height:44px;border-radius:12px;display:flex;
+  align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.d1{background:#EDE9FE;} .d2{background:#FEF0EC;} .d3{background:#E8F5EA;} .d4{background:#FEF5E8;}
+.ch-info{flex:1;}
+.ch-title{font-size:14px;font-weight:600;}
+.ch-sub{font-size:11px;color:var(--ts);margin-top:2px;}
+.ch-arr{font-size:16px;color:var(--tl);}
+.ch-prog{height:3px;background:var(--bg);margin:0 16px 12px;}
+.ch-progfill{height:100%;background:var(--r);border-radius:2px;transition:width .4s;}
+
+/* TOPIC LIST */
+.topic-group{font-size:10px;font-weight:600;color:var(--ts);
+  text-transform:uppercase;letter-spacing:.06em;padding:14px 14px 5px;}
+.tlist{padding:0 14px;display:flex;flex-direction:column;gap:6px;}
+.tc{background:var(--card);border-radius:10px;border:.5px solid var(--bd);
+  padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
+  transition:transform .1s;}
+.tc:active{transform:scale(.98);}
+.t-ico{font-size:18px;flex-shrink:0;}
+.t-info{flex:1;}
+.t-title{font-size:13px;font-weight:600;}
+.t-themes{font-size:11px;color:var(--ts);margin-top:2px;line-height:1.4;}
+.t-badge{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px;}
+.tbest{font-size:11px;font-weight:600;}
+.tbest.perfect{color:var(--g);}
+.tbest.good{color:#B05D0A;}
+.tbest.poor{color:var(--r);}
+.tbest.none{color:var(--tl);}
+.t-check{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.t-check.done{background:var(--gl);color:var(--g);}
+.t-check.undone{background:var(--bg);color:var(--tl);border:.5px solid var(--bd);}
+
+/* QUIZ */
+.quiz-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px;}
+.q-no{font-size:11px;font-weight:600;color:var(--tl);text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:8px;}
+.q-ctx{background:var(--rl);border-left:3px solid var(--r);border-radius:8px;
+  padding:11px 13px;font-size:12px;color:#6B2D1A;line-height:1.55;margin-bottom:14px;}
+.q-txt{font-size:17px;font-weight:600;line-height:1.45;margin-bottom:18px;}
+.opts{display:flex;flex-direction:column;gap:9px;margin-bottom:16px;}
+.op{background:var(--card);border-radius:10px;border:1.5px solid var(--bd);
+  padding:13px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;
+  text-align:left;width:100%;min-height:50px;transition:border-color .15s,background .15s;}
+.op:active{transform:scale(.99);}
+.op.sel{border-color:var(--r);background:var(--rl);}
+.op.cor{border-color:var(--g);background:var(--gl);}
+.op.wrg{border-color:#DC2626;background:#FEF2F2;}
+.op.rcor{border-color:var(--g);background:var(--gl);}
+.ol{width:26px;height:26px;border-radius:50%;background:var(--bg);
+  border:1.5px solid var(--bds);display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;color:var(--ts);}
+.op.sel .ol{background:var(--r);border-color:var(--r);color:#fff;}
+.op.cor .ol{background:var(--g);border-color:var(--g);color:#fff;}
+.op.wrg .ol{background:#DC2626;border-color:#DC2626;color:#fff;}
+.op.rcor .ol{background:var(--g);border-color:var(--g);color:#fff;}
+.ot{font-size:13px;line-height:1.45;color:var(--t);flex:1;}
+.reveal{background:var(--card);border-radius:12px;border:.5px solid var(--bd);
+  padding:14px;margin-bottom:16px;display:none;}
+.reveal.vis{display:block;}
+.rev-lbl{font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:5px;}
+.rev-lbl.c{color:var(--g);}.rev-lbl.w{color:#DC2626;}
+.rev-exp{font-size:13px;line-height:1.55;}
+.q-actions{display:flex;flex-direction:column;gap:9px;
+  padding-bottom:calc(20px + var(--safe-bot));}
+.btn{background:var(--r);color:#fff;border:none;padding:16px 20px;
+  border-radius:100px;font-size:16px;font-weight:600;cursor:pointer;width:100%;}
+.btn:active{opacity:.88;}
+.btn:disabled{background:var(--bds);cursor:default;}
+.btn2{background:var(--card);color:var(--t);border:1.5px solid var(--bds);
+  padding:14px 20px;border-radius:100px;font-size:14px;font-weight:600;
+  cursor:pointer;width:100%;}
+.btn2:active{background:var(--bg);}
+
+/* RESULTS */
+.res-hero{background:var(--r);padding-top:calc(var(--safe-top)+40px);
+  padding-bottom:28px;text-align:center;padding-left:20px;padding-right:20px;}
+.res-ring{width:96px;height:96px;border-radius:50%;
+  background:rgba(255,255,255,.15);border:3.5px solid rgba(255,255,255,.35);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin:0 auto 14px;}
+.res-score{font-size:30px;font-weight:700;color:#fff;}
+.res-of{font-size:13px;color:rgba(255,255,255,.65);}
+.res-title{font-size:21px;font-weight:700;color:#fff;}
+.res-msg{font-size:13px;color:rgba(255,255,255,.78);margin-top:5px;}
+.new-best{background:rgba(255,255,255,.2);border-radius:100px;
+  display:inline-block;padding:4px 14px;font-size:12px;font-weight:600;
+  color:#fff;margin-top:10px;}
+.res-review{padding:14px;display:flex;flex-direction:column;gap:9px;}
+.ri{background:var(--card);border-radius:10px;border:.5px solid var(--bd);padding:13px;}
+.ri-badge{display:inline-block;font-size:10px;font-weight:600;
+  padding:2px 8px;border-radius:100px;margin-bottom:5px;}
+.ri-badge.c{background:var(--gl);color:var(--g);}
+.ri-badge.w{background:#FEF2F2;color:#DC2626;}
+.ri-q{font-size:12px;font-weight:600;margin-bottom:5px;line-height:1.4;}
+.ri-a{font-size:11px;line-height:1.55;color:var(--ts);}
+.res-actions{padding:12px 14px;display:flex;flex-direction:column;gap:9px;
+  padding-bottom:calc(20px + var(--safe-bot));}
+
+/* INSTALL BANNER */
+.install-banner{background:#fff3cd;border:.5px solid #ffc107;
+  margin:14px;border-radius:10px;padding:12px 14px;display:none;}
+.install-banner.show{display:block;}
+.ib-title{font-size:13px;font-weight:600;color:#856404;margin-bottom:4px;}
+.ib-steps{font-size:12px;color:#856404;line-height:1.6;}
+.ib-close{float:right;background:none;border:none;font-size:18px;cursor:pointer;color:#856404;}
+
+/* IMPORT/EXPORT */
+.io-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px 8px;}
+.btn-exp{background:#1A4D8C;color:#fff;border:none;padding:13px 10px;border-radius:100px;
+  font-size:13px;font-weight:600;cursor:pointer;width:100%;display:flex;align-items:center;
+  justify-content:center;gap:6px;}
+.btn-exp:active{opacity:.85;}
+.btn-imp{background:#fff;color:#1A4D8C;border:2px solid #1A4D8C;padding:12px 10px;
+  border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;width:100%;
+  display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-imp:active{background:#EAF0FA;}
+.toast{position:fixed;bottom:calc(20px + var(--safe-bot));left:50%;transform:translateX(-50%);
+  background:#0F0F0F;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;
+  font-weight:500;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;
+  white-space:nowrap;}
+.toast.show{opacity:1;}
+/* MISC */
+.empty{text-align:center;padding:40px 20px;color:var(--ts);font-size:14px;}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<input type="file" id="imp-input" accept=".json" style="display:none" onchange="importFile(this)">
+
+<!-- HOME SCREEN -->
+<div class="sc on" id="s-home">
+  <div class="home-hero" style="padding-top:calc(env(safe-area-inset-top,0px) + 14px);">
+    <div class="hero-row">
+      <div class="hero-icon">📚</div>
+      <div class="hero-text">
+        <h1>Pflegias Quiz</h1>
+        <p>Prüfungstraining · 150 Fragen offline</p>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-n" id="stat-done">0</div><div class="hstat-l">Themen abgeschlossen</div></div>
+      <div class="hstat"><div class="hstat-n" id="stat-total">30</div><div class="hstat-l">Themen gesamt</div></div>
+      <div class="hstat"><div class="hstat-n" id="stat-correct">0</div><div class="hstat-l">Richtige Antworten</div></div>
+      <div class="hstat"><div class="hstat-n" id="stat-streak">0🔥</div><div class="hstat-l">Tage in Folge</div></div>
+    </div>
+  </div>
+  <div class="body" id="home-body">
+    <div class="install-banner" id="install-banner">
+      <button class="ib-close" onclick="this.parentElement.style.display='none'">×</button>
+      <div class="ib-title">📲 Als App installieren</div>
+      <div class="ib-steps">
+        iPhone: Tippe auf ↑ → „Zum Home-Bildschirm"<br>
+        Android: Tippe auf ⋮ → „Zum Startbildschirm"
+      </div>
+    </div>
+    <div class="ring-wrap">
+      <svg class="ring-svg" viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="42"/>
+        <circle class="ring-fg" id="ring-fg" cx="50" cy="50" r="42"
+          stroke-dasharray="263.9" stroke-dashoffset="263.9"/>
+        <text class="ring-txt" x="50" y="46" text-anchor="middle" dominant-baseline="middle" id="ring-pct">0%</text>
+        <text class="ring-sub" x="50" y="60" text-anchor="middle">Fortschritt</text>
+      </svg>
+    </div>
+    <div id="home-chapters"></div>
+    <div class="io-row">
+      <button class="btn-exp" onclick="exportProgress()">📤 Exportieren</button>
+      <button class="btn-imp" onclick="document.getElementById('imp-input').click()">📥 Importieren</button>
+    </div>
+    <div style="padding:0 14px 20px;">
+      <button class="btn2" onclick="resetAll()">🗑 Fortschritt zurücksetzen</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPICS SCREEN -->
+<div class="sc" id="s-topics">
+  <div class="hd">
+    <div class="hd-row">
+      <button class="bk" onclick="go('s-home')">←</button>
+      <div><div class="hd-title" id="top-title"></div>
+      <div class="hd-sub" id="top-sub"></div></div>
+    </div>
+  </div>
+  <div class="body" id="topics-body"></div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div class="sc" id="s-quiz">
+  <div class="hd">
+    <div class="hd-row">
+      <button class="bk" onclick="exitQuiz()">✕</button>
+      <div style="flex:1;overflow:hidden;">
+        <div class="hd-title" id="quiz-title"></div>
+        <div class="hd-sub" id="quiz-sub"></div>
+      </div>
+    </div>
+    <div class="pbar"><div class="pfill" id="pf" style="width:0%"></div></div>
+  </div>
+  <div class="quiz-body" id="quiz-body"></div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div class="sc" id="s-results">
+  <div class="body">
+    <div class="res-hero">
+      <div class="res-ring">
+        <div class="res-score" id="r-score">0</div>
+        <div class="res-of" id="r-of">von 5</div>
+      </div>
+      <div class="res-title" id="r-title"></div>
+      <div class="res-msg" id="r-msg"></div>
+      <div class="new-best" id="r-newbest" style="display:none">⭐ Neuer Rekord!</div>
+    </div>
+    <div class="res-review" id="res-review"></div>
+    <div class="res-actions">
+      <button class="btn" id="r-retry">Nochmal üben</button>
+      <button class="btn2" onclick="go('s-home')">Startseite</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================
+   DATA
+   ============================ */
+const CH=[
+  {id:'k1',emoji:'🎯',label:'Auf die Prüfungen, fertig, los!',sub:'Grundlagen & Operatoren',cls:'d1',
+    groups:[{name:'Prüfungswissen',topics:[
+      {id:'k1_k',title:'Kompetenzbereiche KB I–V',emoji:'🏛️',themes:'KB I–V · PflBG · Vorbehaltstätigkeiten'},
+      {id:'k1_o',title:'Operatoren & Anforderungsbereiche',emoji:'📝',themes:'Nennen · Beschreiben · Ermitteln · Entwickeln · AB I–III'},
+      {id:'k1_p',title:'Abschlussprüfung im Überblick',emoji:'📋',themes:'Schriftlich · Mündlich · Praktisch · Bewertung'},
+      {id:'k1_l',title:'Lerntipps & Stressmanagement',emoji:'🧠',themes:'Lernmethoden · Motivation · Prüfungsangst'},
+    ]}]},
+  {id:'k2',emoji:'✍️',label:'Die schriftliche Prüfung',sub:'18 Fälle · 3 Prüfungstage',cls:'d2',
+    groups:[
+      {name:'1. Prüfungstag',topics:[
+        {id:'aufruhr',title:'Aufruhr im Nachtdienst',emoji:'🌙',themes:'Migräne · SBAR · Schmerzassessment · Jugendliche'},
+        {id:'paul',title:'Paul will nach Hause',emoji:'🧒',themes:'ALL (Leukämie) · NANDA · EACH-Charta · Onkologie'},
+        {id:'max',title:"Max' Geheimnis",emoji:'🩸',themes:'Diabetes Typ 1 · Bulimie · Patientenrechte'},
+        {id:'emilia',title:'Emilia mag sich nicht waschen',emoji:'🧒‍♀️',themes:'Schütteltrauma · Neurodermitis · Kindeswohlgefährdung'},
+        {id:'mazur',title:'Frau Mazur hat einen Wunsch',emoji:'🦽',themes:'Multiple Sklerose · Fiechter & Meier · Schmerzmanagement'},
+        {id:'sommer',title:'Herr Sommer ekelt sich',emoji:'🏥',themes:'Morbus Crohn · Stoma · Krohwinkel · Schulz von Thun'},
+      ]},
+      {name:'2. Prüfungstag',topics:[
+        {id:'aslan',title:'Aslan und sein bester Freund',emoji:'🐕',themes:'Asthma · Allergie · EBN · Transitional Care'},
+        {id:'krueger',title:'Frau Krüger bekommt Besuch',emoji:'👶',themes:'Wochenbett · Neugeborenes · Entlassungsmanagement'},
+        {id:'leben',title:'Mein Leben ändern?',emoji:'❤️',themes:'Herzinsuffizienz · Hypertonie · Dekubitusprophylaxe'},
+        {id:'tom',title:'Zu Hause bei Tom',emoji:'🍼',themes:'Säugling · Entwicklung · NANDA · Kinderpflegedienst'},
+        {id:'enttaeuschung',title:'So eine Enttäuschung!',emoji:'🙍',themes:'Multiple Sklerose · Sturzprophylaxe · Peplau'},
+        {id:'weitergehen',title:'Es muss ja weitergehen',emoji:'🚶',themes:'pAVK · Ottawa-Charta · Salutogenese · Prävention'},
+      ]},
+      {name:'3. Prüfungstag',topics:[
+        {id:'festival',title:'Noteinsatz beim Festival',emoji:'🎵',themes:'Epilepsie · Notaufnahme · EEG · § 203 StGB'},
+        {id:'notaufnahme',title:'Neulich in der Notaufnahme',emoji:'🚨',themes:'Manchester Triage · Pankreatitis · septischer Schock'},
+        {id:'kovac',title:'Herr Kovac macht sich unbeliebt',emoji:'🩹',themes:'Thrombose · Alkohol · Kübler-Ross · Wundversorgung'},
+        {id:'augenblick',title:'Wenn ein Augenblick alles verändert',emoji:'♿',themes:'Querschnittslähmung · PTBS · Beauchamp & Childress'},
+        {id:'seifert',title:'Frau Seifert braucht eine Pause',emoji:'😔',themes:'Schwerstbehinderung · WHO-Schmerzschema · Tracheostoma'},
+        {id:'sandkastenliebe',title:'Sie ist meine Sandkastenliebe',emoji:'👴',themes:'Apoplex · Demenz · Tom Kitwood · Sturzprophylaxe'},
+      ]}
+    ]},
+  {id:'k3',emoji:'🗣️',label:'Die mündliche Prüfung',sub:'12 Fälle · Kompetenzaufgaben',cls:'d3',
+    groups:[{name:'Mündliche Prüfungsfälle',topics:[
+      {id:'klara',title:'Klara versteht die Welt nicht mehr',emoji:'👧',themes:'Teamkonflikte · ethisches Dilemma · Pflege-Charta'},
+      {id:'sander',title:'Herr Sander braucht einen Plan',emoji:'💊',themes:'Parkinson · Medikamentenmanagement · Entlassung'},
+      {id:'patienten',title:'Alles für die Patienten?',emoji:'🦠',themes:'MRSA · Hygiene · Arbeitsrecht · Pflegequalität'},
+      {id:'nika',title:'Nika hat ein normales Leben verdient!',emoji:'🌬️',themes:'Muskeldystrophie · Absaugen · IfSG · Kinderpflege'},
+      {id:'einmalwar',title:'Nichts ist mehr so, wie es einmal war',emoji:'🪑',themes:'Tracheostoma · Qualitätsmanagement · SGB XI'},
+      {id:'muell',title:'Eine Wohnung voller Müll',emoji:'🩸',themes:'Diabetes Typ 2 · Wundmanagement · EBN'},
+      {id:'fruehstueck',title:'Zwischenfall in der Frühstückspause',emoji:'🫁',themes:'ALS · Tracheostoma · Praxisanleitung · Ethik'},
+      {id:'heisser',title:'36 Grad, und es wird noch heißer',emoji:'🌡️',themes:'Klimawandel · altersgemischte Teams · Stress'},
+      {id:'koerper',title:'Über meinen Körper bestimme ich',emoji:'💉',themes:'Diabetes Typ 1 · Delegation · Ethik · Jugendliche'},
+      {id:'konrad',title:'Herr Konrad hätte gern ein Bier',emoji:'🍺',themes:'Alkohol · Konflikt · gesetzliche Betreuung'},
+      {id:'team',title:'Willkommen im Team',emoji:'👥',themes:'Einarbeitung · SGB XI · Qualitätsprüfung'},
+      {id:'dorf',title:'Auf dem Dorf ist es nicht so einfach',emoji:'🌿',themes:'Rheumatoide Arthritis · Delegation · Schmerzmanagement'},
+    ]}]},
+  {id:'k4',emoji:'💪',label:'Zu guter Letzt',sub:'Selbstpflege & Prüfungstag',cls:'d4',
+    groups:[{name:'Prüfungsvorbereitung',topics:[
+      {id:'prob',title:'Typische Lernprobleme',emoji:'🧩',themes:'Lernstoff · Motivation · Blackout'},
+      {id:'selbst',title:'Fit bleiben: Selbstpflege',emoji:'🛌',themes:'Schlaf · Entspannung · Work-Life-Balance'},
+      {id:'ptag',title:'So gelingt der Prüfungstag',emoji:'✅',themes:'Zeitmanagement · Operatoren · Nachkontrolle'},
+    ]}]}
+];
+
+const DB={
+  aufruhr:[
+    {q:"Welche Buchstaben stehen im SBAR-Schema für die Handlungsempfehlung?",x:"",o:["S = Situation","B = Background","A = Assessment","R = Recommendation"],c:3,e:"R steht für Recommendation (Empfehlung). SBAR: Situation → Background → Assessment → Recommendation. Die Empfehlung benennt konkrete Maßnahmen für die übernehmende Pflegekraft."},
+    {q:"Sophie (14 J.) klagt über hämmernde Kopfschmerzen und kann keine Flüssigkeiten bei sich behalten. Welche Pflegediagnose ist am wahrscheinlichsten?",x:"",o:["Chronischer Schmerz (NANDA)","Akuter Schmerz (NANDA)","Pflegediagnose: Übelkeit","Mangelernährung"],c:1,e:"'Akuter Schmerz' ist korrekt, da Migräne episodisch und nicht chronisch ist. Die plötzliche Intensität und typischen Begleitzeichen sprechen für einen akuten Verlauf."},
+    {q:"Welches Assessmentinstrument ist zur Schmerzerfassung bei Jugendlichen besonders geeignet?",x:"",o:["Waterlow-Skala","Numerische Rating-Skala (NRS)","Braden-Skala","Glasgow Coma Scale"],c:1,e:"Die NRS (0–10) ist einfach anwendbar und bei Jugendlichen und Erwachsenen validiert. Patienten benennen ihre Schmerzintensität selbst."},
+    {q:"Was bedeutet 'Dehydratationsgefahr' als Pflegeproblem bei Sophie?",x:"",o:["Sophies Gewicht ist zu hoch","Sophie nimmt zu wenig Flüssigkeit zu sich und erbricht – Flüssigkeitsmangel droht","Sophie trinkt zu viel Wasser","Sophies Nierenwerte sind erhöht"],c:1,e:"Dehydratation = Flüssigkeitsmangel. Da Sophie kaum trinken kann und erbricht, verliert sie Flüssigkeit und Elektrolyte. Maßnahmen: Infusionstherapie, Ein-/Ausfuhr protokollieren, Mundpflege."},
+    {q:"Pflegekraft Ingrid Rust sagt: 'Sophie gehört eigentlich auf die Kinderstation.' Wie ist das ethisch einzuordnen?",x:"",o:["Fachlich korrekt und hilfreich","Sie zeigt professionelle Distanz","Sie verletzt Sophies Würde und ist nicht professionell","Sie ist irrelevant für die Übergabe"],c:2,e:"Die Aussage ist ethisch problematisch: Sie verletzt Sophies Würde und zeigt Vorurteile gegenüber Jugendlichen. Professionelle Pflege erfordert Wertschätzung und Respekt gegenüber allen Patienten."}
+  ],
+  paul:[
+    {q:"Was bedeutet die Abkürzung ALL in Pauls Diagnose?",x:"",o:["Allgemeine lymphatische Leukopenie","Akute lymphatische Leukämie","Ambulante Langzeitliche Laboruntersuchung","Allergische Lungenläsion"],c:1,e:"ALL = Akute Lymphatische Leukämie. Bösartige Erkrankung des blutbildenden Systems, häufigste Krebsart bei Kindern. Behandlung: Chemotherapie, die das Immunsystem stark schwächt."},
+    {q:"Paul (10 J.) liegt im 2. Chemozyklus. Seine Leukozyten sind sehr niedrig. Welche Maßnahme hat höchste Priorität?",x:"",o:["Paul täglich wiegen","Paul zu Gruppenaktivitäten einladen","Infektionsschutzmaßnahmen einhalten – Paul vor Keimen schützen","Paul zu Besuchen ermutigen"],c:2,e:"Niedrige Leukozyten = stark geschwächtes Immunsystem. Infektionsschutz hat höchste Priorität: Schutzkleidung, Händedesinfektion, Besuchsregelung, keine frischen Blumen/Früchte."},
+    {q:"Was ist das Ziel des Nutritional Risk Screening (NRS)?",x:"",o:["Körpergröße messen","Mangelernährungsrisiko systematisch einschätzen","Blutzucker kontrollieren","Flüssigkeitsbilanz erfassen"],c:1,e:"NRS 2002: Screening-Instrument zur Erfassung des Mangelernährungsrisikos. Berücksichtigt BMI, Gewichtsverlust, Nahrungsaufnahme und Erkrankungsschwere."},
+    {q:"Was regelt die EACH-Charta für Kinder im Krankenhaus?",x:"",o:["Hygieneanforderungen","Rechte von Kindern: Eltern jederzeit anwesend, altersgerechte Information, Entwicklungsförderung","Medikamentenplan für Kinder","Personalschlüssel"],c:1,e:"EACH-Charta (European Association for Children in Hospital): Eltern sollen jederzeit anwesend sein können, Kinder altersgerecht informiert werden und ihre Entwicklung gefördert werden."},
+    {q:"Paul weint und will nicht mehr da sein. Welche Reaktion ist pflegerisch angemessen?",x:"",o:["Ablenken und Thema ignorieren","Ihm sagen er soll positiv denken","Empathisch zuhören, Gefühle ernst nehmen und das Team informieren","Sofort Eltern anrufen ohne mit Paul zu sprechen"],c:2,e:"Empathisches Zuhören und Ernstnehmen sind essenziell. Anschließend Multiprofessionelles Team informieren (Arzt, Psychologe, Sozialarbeit). Suizidgedanken bei Kindern immer ernst nehmen."}
+  ],
+  max:[
+    {q:"Max kollabiert mit schwerer Hypoglykämie. Was ist die sofortige Erstmaßnahme bei ansprechbarem Patienten?",x:"",o:["Insulin spritzen","Traubenzucker oder zuckerhaltiges Getränk geben","Blutdruck messen","Patient schlafen lassen"],c:1,e:"Bei leichter Hypoglykämie und ansprechbarem Patienten: orale Gabe schnell wirkender Kohlenhydrate (Traubenzucker, Fruchtsaft). Bei Bewusstlosigkeit: keine orale Gabe, Notarzt rufen."},
+    {q:"Was versteht man unter Bulimia nervosa?",x:"",o:["Extrem wenig Kalorien aufnehmen","Anfälle von Essattacken mit anschließendem Erbrechen oder Gegenmaßnahmen","Nur bestimmte Lebensmittel essen","Ständig zu viel essen ohne Gegenmaßnahmen"],c:1,e:"Bulimia nervosa: wiederkehrende Essanfälle mit kompensatorischem Verhalten (Erbrechen, Abführmittel). Anders als Anorexie haben Betroffene meist Normalgewicht."},
+    {q:"Max' Eltern wollen wissen, welche Behandlungen geplant sind. Max ist 19. Was gilt?",x:"",o:["Eltern haben kein Auskunftsrecht ohne Einwilligung des volljährigen Sohns","Alle Familienangehörigen dürfen informiert werden","Der Arzt entscheidet allein","Krankenakte muss immer an Eltern herausgegeben werden"],c:0,e:"§ 203 StGB: Max ist 19 und volljährig. Ohne seine ausdrückliche Zustimmung darf das Team seinen Eltern keine Informationen geben. Der Patient bestimmt selbst, wer informiert wird."},
+    {q:"Pflegefachmann Linus dokumentiert kaum, weil 'Pflege Zuwendung ist'. Was ist problematisch?",x:"",o:["Gar nichts","Fehlende Dokumentation verletzt die Berufspflicht und gefährdet Patientensicherheit","Dokumentation ist nur für Abrechnung","Nur Ärzte müssen dokumentieren"],c:1,e:"Pflegedokumentation ist rechtlich verpflichtend: sichert Versorgungskontinuität, ermöglicht Nachvollziehbarkeit, schützt Pflegende rechtlich. Fehlende Dokumentation = Berufspflichtverletzung."},
+    {q:"Was fördert die Autonomie von Max bei seinem Diabetes-Management?",x:"",o:["Alle Insulingaben durch Pflegepersonal","Max bei allen Entscheidungen übergehen","Max in Therapieplanung einbeziehen und Selbstmanagement-Schulungen anbieten","Max täglich kontrollieren ohne Erklärung"],c:2,e:"Autonomieförderung = Patient als Experten seiner Erkrankung einbeziehen. Selbstmanagement-Schulungen (Insulindosierung, Blutzucker, Ernährung) befähigen Max, seinen Alltag selbst zu gestalten."}
+  ],
+  emilia:[
+    {q:"Was versteht man unter einem Schütteltrauma?",x:"",o:["Sturz aus großer Höhe","Hirnverletzung durch heftiges Schütteln eines Säuglings oder Kleinkindes","Sportverletzung","Psychische Traumatisierung"],c:1,e:"Schütteltrauma (Shaken Baby Syndrome): Durch heftiges Schütteln entstehen Scherverletzungen (Hirnblutungen, Nervenschäden) – die schwachen Nackenmuskeln und das unreife Gehirn machen Kleinkinder extrem anfällig."},
+    {q:"Emilia (8 J.) hat Neurodermitis. Welche Pflegemaßnahme ist besonders wichtig?",x:"",o:["Täglich mit Seife und heißem Wasser waschen","Alkohol zur Desinfektion verwenden","Regelmäßig rückfettende Pflegeprodukte verwenden, Kratzen vermeiden","Hautpflege ist nicht nötig"],c:2,e:"Bei Neurodermitis: Gestörte Hautbarriere ist das zentrale Problem. Rückfettende Pflege (Emollentien) stärkt die Hautbarriere, reduziert Juckreiz. Auf auslösende Substanzen und heißes Wasser verzichten."},
+    {q:"Was bedeutet Kindeswohlgefährdung im Sinne des § 8a SGB VIII?",x:"",o:["Kind hat schlechte Schulnoten","Erhebliche Beeinträchtigung des körperlichen, geistigen oder seelischen Wohls des Kindes","Eltern erziehen streng","Kind ist unglücklich"],c:1,e:"§ 8a SGB VIII: Bei gewichtigen Anhaltspunkten für Kindeswohlgefährdung müssen Fachkräfte aktiv werden. Meldepflicht und Risikoabschätzung im Team. Formen: Vernachlässigung, Misshandlung, Missbrauch."},
+    {q:"Erzieher sagt zu Emilia: 'Du riechst wie ein Stinktier!' Wie ist das einzuordnen?",x:"",o:["Er ist ehrlich, das ist gut","Eine Form psychischer Gewalt / verbaler Misshandlung","Eine pädagogische Methode","Übliche Sprache unter Erziehern"],c:1,e:"Abwertende, beschämende Aussagen = psychische Gewalt. Sie verletzen die Würde des Kindes, schädigen das Selbstbild. Als Pflegekraft: Vorgesetzten informieren, dokumentieren."},
+    {q:"Was gehört zur Pflegeanamnese bei Emilia?",x:"",o:["Nur aktuelle Pflegeprobleme","Nur Medikamente","Biografie, Gewohnheiten, soziales Umfeld, Entwicklungsstand, aktuelle und potenzielle Pflegeprobleme","Nur Arztdiagnosen"],c:2,e:"Pflegeanamnese erfasst: Biografie, Gewohnheiten, Ressourcen, soziales Umfeld, Entwicklungsstand, aktuelle Pflegeprobleme und potenzielle Risiken. Grundlage für den gesamten Pflegeprozess."}
+  ],
+  mazur:[
+    {q:"Frau Mazur hat MS mit progredientem Verlauf. Was bedeutet das?",x:"",o:["Erkrankung heilt sich selbst","Erkrankung verschlechtert sich fortlaufend ohne deutliche Remissionen","Erkrankung bleibt stabil","Erkrankung tritt nur episodisch auf"],c:1,e:"PPMS (primär-progrediente MS): kontinuierliches Fortschreiten ohne klar abgrenzbare Schübe und Remissionen. Spastik, Schmerzen, eingeschränkte Mobilität nehmen stetig zu."},
+    {q:"Was ist das Ziel der Kurzzeitpflege nach § 42 SGB XI?",x:"",o:["Dauerhaft pflegende Person entlasten","Vorübergehend die Versorgung sichern, wenn häusliche Pflege nicht möglich ist (max. 8 Wochen/Jahr)","Pflegegrad erhöhen","Dauerhaft in stationäre Pflege überführen"],c:1,e:"Kurzzeitpflege (§ 42 SGB XI): vorübergehende vollstationäre Versorgung – z.B. nach Krankenhausaufenthalt oder bei Urlaub der Pflegeperson – bis zu 8 Wochen, ca. 1.774 € pro Jahr."},
+    {q:"Welches Assessmentinstrument nutzte die Pflegefachfrau zur Schmerzeinschätzung bei Frau Mazur?",x:"",o:["Braden-Skala","Waterlow-Skala","Numerische Rating-Skala (NRS)","Glasgow Coma Scale"],c:2,e:"NRS (0–10): einfaches, validiertes Selbstbeurteilungsinstrument. 0 = kein Schmerz, 10 = stärkster vorstellbarer Schmerz."},
+    {q:"Frau Mazur hat Pflegegrad 4. Was bedeutet das?",x:"",o:["Leichte Beeinträchtigungen","Erhebliche Beeinträchtigungen","Schwerste Beeinträchtigungen (55–79 Punkte im NBA)","Vollständige Selbstständigkeit"],c:2,e:"PG 4 = schwerste Beeinträchtigungen der Selbstständigkeit mit 55–79 Punkten im Begutachtungsassessment. Umfangreiche Leistungen der Pflegeversicherung (SGB XI)."},
+    {q:"Welche 6 Schritte umfasst der Pflegeprozess nach Fiechter & Meier?",x:"",o:["4 Schritte: Planen, Durchführen, Evaluieren, Dokumentieren","6 Schritte: Informationssammlung → Pflegeprobleme → Ziele → Planung → Durchführung → Evaluation","3 Schritte: Anamnese, Pflege, Kontrolle","Ziele werden vom Arzt formuliert"],c:1,e:"Fiechter & Meier: 1. Informationssammlung, 2. Ressourcen und Pflegeprobleme erkennen, 3. Pflegeziele festlegen, 4. Pflegemaßnahmen planen, 5. Maßnahmen durchführen, 6. Evaluation."}
+  ],
+  sommer:[
+    {q:"Was ist ein Transversostoma?",x:"",o:["Künstlicher Darmausgang am Querkolon","Künstlicher Harnausgang","Magensonde","Katheter"],c:0,e:"Transversostoma: künstlicher Darmausgang (Stoma) am Querkolon (Colon transversum). Wird z.B. bei Morbus Crohn angelegt, wenn der betroffene Darmabschnitt ausgeleitet werden muss."},
+    {q:"Herr Sommer ekelt sich vor seinem Stoma. Wie gehen Sie professionell vor?",x:"",o:["Ihm sagen er soll sich zusammenreißen","Seinen Ekel ignorieren","Ekel als normale Reaktion anerkennen, schrittweise Anleitung anbieten, Selbsthilfegruppen empfehlen","Das Stoma vor ihm verbergen"],c:2,e:"Ekel und Scham sind normale Reaktionen. Professionell: Gefühle empathisch anerkennen, schrittweise Anleitung (beobachten → assistieren → selbst durchführen), Selbsthilfegruppen und Stomaberater anbieten."},
+    {q:"Was beschreibt das 4-Ohren-Modell nach Schulz von Thun?",x:"",o:["3 Kommunikationsstufen","Jede Nachricht hat 4 Aspekte: Sachinhalt, Selbstoffenbarung, Beziehungsaspekt, Appell","2 Kommunikationsphasen","Modell zur Konfliktlösung"],c:1,e:"4-Ohren-Modell: 1. Sachinhalt, 2. Selbstoffenbarung, 3. Beziehungsaspekt, 4. Appell. Missverständnisse entstehen, wenn Sender und Empfänger verschiedene Seiten betonen."},
+    {q:"Was ist Morbus Crohn?",x:"",o:["Lebererkrankung","Chronisch-entzündliche Darmerkrankung, die den gesamten Magen-Darm-Trakt befallen kann","Akute Darminfektion","Bauchspeicheldrüsen-Erkrankung"],c:1,e:"Morbus Crohn: CED, diskontinuierlich, alle Wandschichten, gesamter GI-Trakt. Symptome: Bauchschmerzen, Durchfall, Gewichtsverlust, Erschöpfung."},
+    {q:"Was beschreibt das AEDL-Modell nach Monika Krohwinkel?",x:"",o:["Lernplan für Auszubildende","Pflegemodell mit 13 Aktivitäten und existenziellen Erfahrungen des Lebens als Grundlage der Pflegeplanung","Qualitätsmessmodell","Organisationsplan"],c:1,e:"AEDL-Modell: 13 Aktivitäten (Kommunizieren, Bewegen, Essen/Trinken, Ausscheiden, Sich beschäftigen etc.) und existenzielle Erfahrungen. Grundlage vieler Pflegeplanungen in Deutschland."}
+  ],
+  aslan:[
+    {q:"Was sind typische Auslöser für einen Asthmaanfall?",x:"",o:["Schlafen","Tierhaare, Pollen, Hausstaub oder körperliche Anstrengung","Ruhiges Sitzen","Wasser trinken"],c:1,e:"Asthma-Trigger: Allergene (Tierhaare, Pollen, Hausstaub), Infekte, Kälte, Anstrengung, Rauchen, Stress. Bei Aslan: Hund 'Tobi' (Tierhaare). Meiden der Auslöser ist zentral."},
+    {q:"Was ist EBN (Evidence-Based Nursing)?",x:"",o:["Pflegesystem aus England","Integration von Forschungswissen, klinischer Expertise und Patientenpräferenzen in Pflegeentscheidungen","Bewertungssystem für Pflegequalität","Dokumentationssystem"],c:1,e:"EBN: Pflegeentscheidungen auf Basis von 1. bestem aktuellem Forschungswissen, 2. klinischer Expertise und 3. Patientenwerten/-präferenzen."},
+    {q:"Was versteht man unter Transitional Care?",x:"",o:["Pflege im Notarztwagen","Koordinierte Versorgung beim Übergang zwischen Versorgungsbereichen (z.B. Krankenhaus → häusliche Pflege)","Pflege für Transitreisende","Einarbeitung neuer Pflegekräfte"],c:1,e:"Transitional Care: strukturierte Begleitung beim Wechsel zwischen Versorgungssettings. Ziel: Versorgungskontinuität, Vermeidung von Rehospitalisierung."},
+    {q:"Was beschreibt das Stressmodell nach Lazarus & Folkman?",x:"",o:["Lernplan für Studierende","Wie Menschen Stress bewerten und bewältigen (primäre und sekundäre Bewertung)","Beziehung zwischen Pflegenden und Patienten","Teamführungsmethode"],c:1,e:"Lazarus & Folkman: primäre Bewertung (ist die Situation bedrohlich?), sekundäre Bewertung (habe ich Bewältigungsressourcen?). Stress entsteht, wenn Anforderung > Ressourcen."},
+    {q:"Was gehört zur Primärprävention bei Asthma?",x:"",o:["Kortison bei jedem Atemwegsinfekt","Allergietests für alle Kinder","Aufklärung über Auslöser, Meiden bekannter Allergene, kein Passivrauch","Hospitalisierung bei Atemnot"],c:2,e:"Primärprävention: Verhinderung der Erkrankung. Bei Asthma: Allergene meiden, Rauchexposition vermeiden, Gesundheitsaufklärung. Für Betroffene: Sekundärprävention = Trigger meiden."}
+  ],
+  krueger:[
+    {q:"Was bedeutet APGAR 9/10?",x:"Frau Krügers Sohn kam mit APGAR 9/10 zur Welt.",o:["Säugling ist kritisch","Säugling ist in sehr gutem Zustand mit minimalen Anpassungsschwierigkeiten","Sofortige Reanimation nötig","Angeborene Erkrankung"],c:1,e:"APGAR bewertet 5 Vitalzeichen (Atmung, Puls, Grundtonus, Aussehen, Reflexe). 9/10 = sehr gute Anpassung. 7–10 = guter Zustand."},
+    {q:"Was sichert der Expertenstandard Entlassungsmanagement?",x:"",o:["Schnelle Entlassung","Strukturierte rechtzeitige Vorbereitung der Entlassung zur Sicherung der Versorgungskontinuität","Übernahme der Pflegekosten","Ernährungsprogramm"],c:1,e:"DNQP-Expertenstandard: frühzeitiges Assessment des Entlassungsbedarfs, Einbeziehung von Patient und Angehörigen, Koordination mit nachversorgenden Diensten, strukturierte Informationsweitergabe."},
+    {q:"Frau Krüger stillt, aber es klappt nicht. Was können Sie als Pflegefachperson tun?",x:"",o:["Sofort auf Flasche umstellen","Nur beruhigen ohne zu helfen","Fachkundige Stillberatung anbieten, Anlegen zeigen, Ressourcen stärken","Stillen sofort beenden lassen"],c:2,e:"Stillunterstützung: Anlege-Technik zeigen, häufiges Anlegen empfehlen, Brustkontrolle, Wochenbettdepression beachten, Stillberaterin oder Hebamme einbeziehen."},
+    {q:"Was sind die 3 Präventionsstufen?",x:"",o:["Primär, Sekundär, Tertiär","Aktiv, Passiv, Assistiert","Kurz, Mittel, Langfristig","Medikamentös, Operativ, Konservativ"],c:0,e:"Primärprävention: Erkrankung verhindern. Sekundärprävention: Früherkennung. Tertiärprävention: Rückfallverhütung und Rehabilitation bei bestehender Erkrankung."},
+    {q:"Frau Krügers Schwiegermutter gibt ungebetene Ratschläge. Was ist angemessen?",x:"",o:["Schwiegermutter aus Zimmer weisen","Frau Krüger soll Ratschläge befolgen","Frau Krügers Wunsch nach Ruhe respektieren, neutral vermitteln – Patientenautonomie hat Vorrang","Ratschläge der Schwiegermutter bestätigen"],c:2,e:"Patientenautonomie hat Vorrang. Pflegefachperson unterstützt Frau Krügers Wünsche und vermittelt verständnisvoll aber klar – professionell, ohne Parteinahme."}
+  ],
+  leben:[
+    {q:"Was ist der Unterschied zwischen Herzinsuffizienz und arterieller Hypertonie?",x:"",o:["Das ist dasselbe","Hypertonie = dauerhaft erhöhter Blutdruck; Herzinsuffizienz = Herz pumpt nicht ausreichend Blut","Hypertonie ist harmloser","Herzinsuffizienz bedeutet Herzstillstand"],c:1,e:"Arterielle Hypertonie (>140/90 mmHg) ist ein wichtiger Risikofaktor für Herzinsuffizienz (NYHA I–IV). Bei HI: Ödem, Dyspnoe, Leistungsminderung."},
+    {q:"Herr Beck (NYHA IV) hat ödematöse Beine. Was bedeutet das für seine Mobilität?",x:"",o:["Er kann Sport treiben","Ödeme schränken Mobilität stark ein – Bettlägerigkeit und Dekubitusrisiko steigen","Ödeme sind harmlos","Ödeme erfordern sofortige Operation"],c:1,e:"NYHA IV = Beschwerden in Ruhe. Beinödeme erhöhen Risiko für Dekubitus, Thrombose, Pneumonie. Waterlow- oder Braden-Skala erfassen das Dekubitusrisiko."},
+    {q:"Was beschreibt das Modell des Bettlägerigwerdens nach Abt-Zegelin?",x:"",o:["Ernährungsplan für immobile Patienten","Stufenmodell, das zeigt wie Immobilität schrittweise entsteht (von gelegentlichem Zögern bis zur Bettlägerigkeit)","Bewertungssystem für Pflegebedürftigkeit","Sturzpräventionsmodell"],c:1,e:"Abt-Zegelin: 5 Phasen: Zögerer → Unsichere → Heimsitzer → Stubenhocker → Bettlägerige. Frühzeitiges Erkennen und Gegensteuern verhindert das Fortschreiten."},
+    {q:"Was sind die 5 Handlungsfelder der Ottawa-Charta?",x:"",o:["Impfen, Screenen, Beraten, Behandeln, Nachsorgen","Gesundheitsfördernde Gesamtpolitik, Lebenswelten schaffen, Gemeinschaftsaktionen, persönliche Kompetenzen, Gesundheitsdienste neu orientieren","Prävention, Kuration, Rehabilitation, Pflege, Palliativversorgung","Primär, Sekundär, Tertiär, Quartär, Quinär"],c:1,e:"Ottawa-Charta (WHO 1986): 1. Gesundheitsfördernde Gesamtpolitik, 2. Unterstützende Lebenswelten, 3. Gemeinschaftsaktionen, 4. Persönliche Kompetenzen, 5. Gesundheitsdienste neu orientieren."},
+    {q:"Die Waterlow-Skala erfasst das Dekubitusrisiko. Was wird bewertet?",x:"",o:["Nur Körpergewicht","Gewicht/BMI, Hautbeschaffenheit, Geschlecht/Alter, Mobilität, Kontinenz, Ernährung, Neurologie, Sonderrisiken","Nur Alter und Mobilität","Nur Blutdruckwerte"],c:1,e:"Waterlow: Körperbau/Gewicht, Hauttyp, Geschlecht/Alter, Mobilität, Kontinenz, Appetit, neurologische Störungen, Sonderrisiken (Zytotoxika, Rauchen). ≥10 = erhöhtes, ≥15 = hohes Risiko."}
+  ],
+  tom:[
+    {q:"Tom (9 Monate) hat 'Plagiozephalie'. Was bedeutet das?",x:"",o:["Schädeldeformität durch einseitige Lagerung (abgeflachter Hinterkopf)","Neurologische Erkrankung","Allergiereaktion","Herzerkrankung"],c:0,e:"Plagiozephalie: entsteht durch einseitigen Druck auf den weichen Schädel (Rückenlage). Maßnahmen: Lagerungswechsel, Tummy-Time, ggf. Physiotherapie oder Helm-Therapie."},
+    {q:"Was sind 'Grenzsteine der Entwicklung' bei einem 9 Monate alten Säugling?",x:"",o:["Meilensteine der motorischen, sprachlichen und sozialen Entwicklung, die ein Kind in einem bestimmten Alter erreicht haben sollte","Pflegerische Grenzen","Gesetzliche Regelungen","Ernährungsempfehlungen"],c:0,e:"Grenzsteine nach Michaelis: Entwicklungsziele für bestimmte Altersgruppen. Mit 9 Monaten: freies Sitzen, Lallen, Fremdeln. Werden sie nicht erreicht: Beratungs-/Therapiebedarf."},
+    {q:"Was ist das Ziel der Dekubitusprophylaxe?",x:"",o:["Sturz verhindern","Druckgeschwüre durch Druckentlastung und Positionswechsel verhindern","Gewicht kontrollieren","Infektionen verhindern"],c:1,e:"Dekubitusprophylaxe: Positionswechsel (mind. alle 2h), druckverteilende Hilfsmittel, Hautpflege, Ernährungsoptimierung, Mobilisation. DNQP-Expertenstandard gibt Empfehlungen."},
+    {q:"Tom hat Schluckprobleme. Wer ist im interprofessionellen Team für Schlucktherapie zuständig?",x:"",o:["Pflegefachkraft allein","Nur der Kinderarzt","Logopädin/Logopäde, koordiniert durch das Pflegeteam","Nur die Eltern"],c:2,e:"Schluckstörungen (Dysphagie): Behandlung durch Logopädie. Pflege: Empfehlungen im Alltag umsetzen (Konsistenz, Haltung), beobachten und dokumentieren. Interprofessionell!"},
+    {q:"Welche NANDA-Pflegediagnose ist bei Toms Mangelernährung passend?",x:"",o:["Chronischer Schmerz","Ernährungsimbalance: weniger als der Körperbedarf / untergewichtige Körpermasse","Sehbehinderung","Schlafstörung"],c:1,e:"NANDA: 'Ernährungsimbalance: weniger als der Körperbedarf' – Nährstoffaufnahme liegt unter dem metabolischen Bedarf. Ziele und Maßnahmen fokussieren auf Kalorienaufnahme und Schlucken."}
+  ],
+  enttaeuschung:[
+    {q:"Was ist die Theorie der interpersonalen Beziehungen nach Hildegard Peplau?",x:"",o:["Pflegetheorie, die die heilsame Bedeutung der Pflegebeziehung betont (4 Phasen)","Kommunikationsmodell","Krankheitsentstehungstheorie","Qualitätsmessinstrument"],c:0,e:"Peplau (1952): 4 Phasen: 1. Orientierung, 2. Identifikation, 3. Nutzung, 4. Ablösung. Pflege als therapeutische interpersonale Beziehung."},
+    {q:"Was ist der Expertenstandard Sturzprophylaxe?",x:"",o:["Pflegestandard zur Verhinderung von Stürzen durch Risikobewertung und Maßnahmen","Allgemeines Sicherheitskonzept","Medikamentenplan","Gesetzliche Regelung"],c:0,e:"DNQP: Sturzrisikoerfassung (z.B. Morse Fall Scale), individuelle Maßnahmen (Umgebungsanpassung, Hilfsmittel, Schulung), Evaluation. Ziel: Sturzrate senken."},
+    {q:"Frau Amsel hat MS und einen Dauerkatheter. Was ist bei der Katheterpflege wichtig?",x:"",o:["Täglich wechseln","Strikte Asepsis, Meatal-Pflege, System geschlossen, Infektionszeichen beachten","1x/Woche spülen","Nur bei Schmerzen wechseln"],c:1,e:"Katheterpflege: aseptisch vorgehen, tägliche Meatal-Pflege, Drainagesystem geschlossen halten, ausreichend Flüssigkeit, Infektionszeichen beobachten (Fieber, trüber Urin). Ziel: CAUTI verhindern."},
+    {q:"Was bedeutet Gesundheitsförderung im Berufsalltag für Pflegende?",x:"",o:["Nur eigene körperliche Fitness","Maßnahmen, die vor berufsbedingten Erkrankungen schützen: Ergonomie, Stressmanagement, psychische Gesundheit","Aufhören zu rauchen","Nur gesunde Ernährung"],c:1,e:"Betriebliche Gesundheitsförderung: Rückenschule, ergonomische Hilfsmittel, Stressprävention, Supervision, psychische Gesundheitsangebote. Eigenverantwortung und betriebliche Strukturen sind wichtig."},
+    {q:"Welche Pflegetheorie beschreibt das Konzept der 'Caring'-Beziehung?",x:"",o:["AEDL-Modell (Krohwinkel)","Theorie von Jean Watson – Pflege als zwischenmenschliche Fürsorge","Roper-Logan-Tierney-Modell","Salutogenese nach Antonovsky"],c:1,e:"Jean Watson (Theory of Human Caring): Pflege als Fürsorgebeziehung mit 10 Caritas-Prozessen. Echtes empathisches Interesse am Menschen auf allen Ebenen (körperlich, geistig, spirituell)."}
+  ],
+  weitergehen:[
+    {q:"Was bedeutet pAVK?",x:"",o:["Periphere arterielle Verschlusskrankheit – Durchblutungsstörung in den Extremitäten","Pneumonie mit aVersorgung","Partieller abdominaler Venenverschluss","Primäre Arthritis mit Vaskulitis"],c:0,e:"pAVK: Verengung der Extremitätenarterien durch Arteriosklerose. Symptome: Claudicatio intermittens (Schaufensterkrankheit), Ruheschmerzen, Nekrosen. Risikofaktoren: Rauchen, Diabetes, Hypertonie."},
+    {q:"Was beschreibt die Ottawa-Charta (WHO 1986)?",x:"",o:["Ernährungsempfehlung der WHO","Internationales Dokument, das Gesundheitsförderung als Prozess zur Verbesserung der Gesundheitskontrolle definiert","Pflegestandard für chronische Erkrankungen","Europäisches Gesundheitsgesetz"],c:1,e:"Ottawa-Charta (1986): 5 Handlungsfelder zur Gesundheitsförderung. Gesundheit als positiver Begriff – nicht nur Abwesenheit von Krankheit."},
+    {q:"Was unterscheidet Salutogenese von Pathogenese?",x:"",o:["Salutogenese fragt nach Entstehung von Gesundheit, Pathogenese nach Entstehung von Krankheit","Sie sind dasselbe","Salutogenese ist eine Therapieform","Pathogenese ist ein Pflegemodell"],c:0,e:"Antonovsky (1979): Salutogenese = 'Was hält Menschen gesund?'. Kohärenzgefühl (Verstehbarkeit, Handhabbarkeit, Bedeutsamkeit) ist das Kernkonzept."},
+    {q:"Was ist bei der Schulung zur Blutdruckselbstmessung besonders wichtig?",x:"",o:["Gerät geben ohne Erklärung","Einmalig schriftlich informieren","Schrittweise anleiten, üben lassen, Rückfragen ermöglichen, Protokollführung erklären","Arzt soll messen"],c:2,e:"Patientenschulung: Gerät erklären, Technik zeigen, Ruhephase, beide Arme, Blutdrucktagebuch. Teach-back: Patient wiederholt was er verstanden hat."},
+    {q:"Was umfasst die Tertiärprävention bei pAVK?",x:"",o:["Erkrankung durch Lebensstil verhindern","Früherkennung","Komplikationen verhindern und Rehabilitation: Gehtraining, Rauchstopp, Fußpflege, Wundversorgung","Impfungen"],c:2,e:"Tertiärprävention: Komplikationen und Verschlechterung verhindern. Bei pAVK: strukturiertes Gehtraining, Rauchstopp, Fußinspektion, Risikofaktoren einstellen, Wundversorgung."}
+  ],
+  festival:[
+    {q:"Was ist ein Grand-mal-Anfall?",x:"",o:["Kurze Bewusstseinspause ohne Zuckungen","Plötzlicher Bewusstseinsverlust mit tonischer Phase (Steifheit) + klonischer Phase (rhythmische Zuckungen)","Einseitiger Krampf des Arms","Nur optische Phänomene"],c:1,e:"Grand-mal (generalisierter tonisch-klonischer Anfall): tonische Phase → klonische Phase → postiktale Erschöpfung. Erstmaßnahmen: Verletzungsschutz, Zeit stoppen, nichts in den Mund."},
+    {q:"Was regelt § 203 StGB in Bezug auf Patientendaten?",x:"",o:["Dokumentationspflicht","Verbot, Patientendaten ohne Einwilligung weiterzugeben – Schweigepflicht für Heilberufe","Datenspeicherdauer","Patientenaufklärung vor Operationen"],c:1,e:"§ 203 StGB: Schweigepflicht für Ärzte, Pflegepersonal und andere Heilberufe. Keine Informationsweitergabe ohne Einwilligung. Ausnahmen: Meldepflichten, Notwehr."},
+    {q:"Was ist ein EEG?",x:"",o:["Messung der Herzströme","Messung der elektrischen Hirnaktivität – wichtig bei Epilepsie-Diagnostik","Darstellung der Hirnstruktur","Laborwert im Blut"],c:1,e:"EEG: misst elektrische Gehirnaktivität über Kopf-Elektroden. Bei Epilepsie: charakteristische Muster (Spikes, Sharp waves). Hilft bei Diagnostik, Klassifikation, Therapieplanung."},
+    {q:"Niklas' Vater reagiert wütend in der Notaufnahme. Wie reagieren Sie professionell?",x:"",o:["Ignorieren","Anbrüllen","Ruhig bleiben, Verständnis zeigen, sachlich informieren, deeskalieren","Sofort Sicherheitsdienst rufen"],c:2,e:"Deeskalierende Kommunikation: ruhige Stimme, Sicherheitsabstand, Verständnis für Sorge zeigen, klare sachliche Informationen. Wut entsteht oft aus Angst – Empathie hilft mehr als Konfrontation."},
+    {q:"Was gilt bei der Informationsweitergabe an minderjährige Patienten bzw. ihre Eltern?",x:"",o:["Eltern haben immer uneingeschränktes Auskunftsrecht","Bei Minderjährigen entscheiden Sorgeberechtigte mit; ab einem bestimmten Reifegrad werden auch die Wünsche des Jugendlichen berücksichtigt","Minderjährige haben keine Rechte","Nur der Arzt entscheidet"],c:1,e:"Eltern mit Sorgerecht entscheiden bei Minderjährigen. Mit zunehmendem Reifegrad (ab ca. 14–16 Jahren) sind auch die Wünsche des Jugendlichen zu berücksichtigen. Einwilligungsfähigkeit ist individuell zu prüfen."}
+  ],
+  notaufnahme:[
+    {q:"Was bedeutet das Manchester Triage System (MTS)?",x:"",o:["Behandlungsprotokoll für Herzinfarkt","Standardisiertes Ersteinschätzungssystem – Patienten werden nach Dringlichkeit in 5 Kategorien eingeteilt","Schmerzskala","Dokumentationssystem"],c:1,e:"MTS: 1. Sofort (rot), 2. Sehr dringend (orange, 10 Min.), 3. Dringend (gelb, 30 Min.), 4. Normal (grün, 90 Min.), 5. Nicht dringend (blau, 120 Min.). Priorisierung in der Notaufnahme."},
+    {q:"Was sind typische Symptome einer akuten Pankreatitis?",x:"",o:["Kopfschmerzen und Schwindel","Gürtelförmige Oberbauchschmerzen, Übelkeit, Erbrechen, erhöhte Pankreas-Enzyme (Lipase, Amylase)","Brustschmerzen und Atemnot","Rückenschmerzen ohne Ausstrahlung"],c:1,e:"Akute Pankreatitis: starke gürtelförmige Schmerzen (Oberbauch → Rücken), Übelkeit, Erbrechen. Labor: stark erhöhte Lipase. Ursachen: Alkohol, Gallensteine."},
+    {q:"Was versteht man unter einem septischen Schock?",x:"",o:["Schock durch Blutverlust","Lebensbedrohlicher Zustand mit Organversagen als Folge einer unkontrollierten Infektion mit Kreislaufversagen","Anaphylaktischer Schock durch Allergie","Schock durch Herzversagen"],c:1,e:"Septischer Schock = schwerste Sepsis-Form: persistierender Blutdruckabfall trotz Flüssigkeitsgabe, Vasopressorbedarf. Unkontrollierte Immunantwort → Multiorganversagen. Sofortige Intensivtherapie."},
+    {q:"Warum ist Händedesinfektion in der Notaufnahme so wichtig?",x:"",o:["Hygiene ist dort nicht so wichtig","Händedesinfektion ist die wichtigste Maßnahme zur Verhinderung nosokomialer Infektionen","Händewaschen reicht","Handschuhe ersetzen Händedesinfektion"],c:1,e:"WHO: '5 Moments for Hand Hygiene'. Händedesinfektion effektiver als Händewaschen. Wichtigste Einzelmaßnahme zur Prävention nosokomialer Infektionen."},
+    {q:"Herr Becker trinkt täglich Alkohol. Ein Entzug ohne Begleitung ist gefährlich, weil:",x:"",o:["Er einfach aufhören kann","Alkoholentzug lebensbedrohlich sein kann (Entzugssyndrom, Delirium tremens, Krampfanfälle)","Alkohol kein medizinisches Problem ist","Er mehr Willenskraft braucht"],c:1,e:"Alkoholentzug kann lebensbedrohlich sein: Zittern, Schwitzen, Halluzinationen, Krampfanfälle, Delirium tremens. Medizinisch begleiteter Entzug notwendig. Pflege: empathisch, nicht wertend."}
+  ],
+  kovac:[
+    {q:"Thromboseprophylaxe basiert auf der Virchow-Trias. Welche 3 Faktoren sind das?",x:"",o:["Alter, Gewicht, Blutdruck","Verlangsamung des Blutflusses, Gefäßwandschäden, Gerinnungsveränderungen","Rauchen, Diabetes, Stress","Bewegungsmangel, Dehydration, Fieber"],c:1,e:"Virchow-Trias: 1. Verlangsamung des Blutflusses (Stase), 2. Gefäßwandschäden (Endothelschäden), 3. Gerinnungsveränderungen (Hyperkoagulabilität). Prophylaxe: Mobilisation, Kompression, Heparin."},
+    {q:"Welche 5 Sterbephasen beschreibt Elisabeth Kübler-Ross?",x:"",o:["Verleugnung – Zorn – Verhandeln – Depression – Akzeptanz","Trauer – Wut – Akzeptanz – Stille – Frieden","Schock – Trauer – Heilung – Frieden – Tod","Verneinung – Aggression – Panik – Gleichmut – Ruhe"],c:0,e:"Kübler-Ross: 1. Verleugnung, 2. Zorn, 3. Verhandeln, 4. Depression, 5. Akzeptanz. Die Phasen sind nicht linear – Patienten können zwischen Phasen wechseln."},
+    {q:"Wann ist eine Fixierung legal erlaubt?",x:"",o:["Immer wenn Patient unruhig ist","Nur mit richterlichem Beschluss – außer bei akuter Selbst- oder Fremdgefährdung als Notfallmaßnahme","Sie ist immer verboten","Wenn Angehörige zustimmen"],c:1,e:"§ 1906 BGB: FEM = schwerer Grundrechtseingriff. Richterlicher Beschluss erforderlich. Ausnahme: akute Notfallsituation (kurzzeitig, sofortige Meldung). Alternativen IMMER zuerst prüfen."},
+    {q:"Was sind Prinzipien der feuchten Wundversorgung?",x:"",o:["Wunde austrocknen lassen","Wunde täglich mit H2O2 behandeln","Feuchtes Wundmilieu erhalten (Hydrokolloid, Alginate) – fördert Heilung bei chronischen Wunden","Sterilen Verband nie wechseln"],c:2,e:"Feuchte Wundversorgung: erhält physiologisches feuchtes Milieu, fördert Granulation und Epithelisierung, reduziert Schmerzen beim Verbandswechsel. Indiziert bei chronischen/komplexen Wunden."},
+    {q:"Welche Zeichen sollten bei einem alkoholabhängigen Patienten beobachtet werden?",x:"",o:["Keine erkennbaren Zeichen","Zittern, Schwitzen, Reizbarkeit, Alkoholgeruch, Verharmlosung des Konsums, soziale Isolation","Nur körperliche Symptome","Immer offensichtliche Trunkenheit"],c:1,e:"Zeichen der Abhängigkeit: körperlich (Zittern, Schwitzen, rotes Gesicht, Leberveränderungen) und psychisch (Verharmlosung, Reizbarkeit, Isolation). Begegnen Sie empathisch und nicht wertend."}
+  ],
+  augenblick:[
+    {q:"Was bedeutet Querschnittslähmung (Paraplegie) im Alltag?",x:"",o:["Vorübergehende Schwäche der Beine","Dauerhafter Verlust von Motorik und Sensibilität unterhalb der Läsionshöhe","Lähmung nur eines Arms","Nur Taubheitsgefühl"],c:1,e:"Paraplegie (Beine) / Tetraplegie (alle 4 Extremitäten): dauerhafter Ausfall von Motorik, Sensibilität, vegetativen Funktionen. Pflege: Dekubitusprophylaxe, Blasenmanagement, Mobilisation, psychische Unterstützung."},
+    {q:"Was sind die 4 Prinzipien nach Beauchamp & Childress?",x:"",o:["Reinlichkeit, Ordnung, Disziplin, Fürsorge","Autonomie, Nicht-Schaden (non-maleficence), Fürsorge (beneficence), Gerechtigkeit","Ehrlichkeit, Kompetenz, Empathie, Respekt","Diagnose, Therapie, Prävention, Rehabilitation"],c:1,e:"Principism (Beauchamp & Childress): 1. Autonomie, 2. Nicht-Schaden, 3. Fürsorge/Wohltun, 4. Gerechtigkeit. Weltweit meistgenutztes Rahmenwerk der Medizinethik."},
+    {q:"Was ist eine PTBS?",x:"",o:["Vorübergehende Traurigkeit","Psychische Erkrankung nach traumatischen Ereignissen mit Flashbacks, Vermeidungsverhalten, Übererregung","Persönlichkeitsstörung","Angststörung ohne erkennbaren Auslöser"],c:1,e:"PTBS: Wiedererleben (Flashbacks, Albträume), Vermeidung, kognitive/emotionale Veränderungen, Übererregung. Behandlung: traumafokussierte KVT, EMDR, ggf. Pharmakotherapie."},
+    {q:"Was ist ein suprapubischer Blasenkatheter?",x:"",o:["Katheter durch die Harnröhre","Durch die Bauchdecke in die Blase eingeführter Katheter – weniger Infektionsrisiko, mehr Komfort","Nierenkatheter","Kurzzeitiger Notfallkatheter"],c:1,e:"Suprapubischer Katheter (SPK): durch Bauchdecke direkt in die Blase. Vorteile: geringeres Infektionsrisiko, bessere Hygiene, Langzeitkomfort. Nachteil: operativer Eingriff, Stomarandpflege nötig."},
+    {q:"Was versteht man unter dem Krohwinkel-Modell in der Katastrophenpflege?",x:"",o:["Modell für den Alltagsbetrieb","Fördernde Prozesspflege: AEDL-Modell auch unter schwierigen Bedingungen anwenden – Ressourcen aktivieren und Autonomie erhalten","Krisenplan für Krankenhäuser","Modell für psychiatrische Pflege"],c:1,e:"Krohwinkel (fördernde Prozesspflege): AEDL-Modell fokussiert auf Ressourcen und Fähigkeiten. Auch in Katastrophensituationen: Patient aktiv einbeziehen, Autonomie so weit wie möglich erhalten."}
+  ],
+  seifert:[
+    {q:"Welches Schmerzassessment ist bei Matteo (8 J., nicht verbal) geeignet?",x:"",o:["Numerische Rating-Skala (NRS)","Paediatric Pain Profile (PPP) – für Menschen, die sich nicht verbal äußern können","Wong-Baker FACES","Glasgow Coma Scale"],c:1,e:"PPP: Beobachtungsinstrument für Kinder/Jugendliche mit schwerer neurologischer Beeinträchtigung. 20 Verhaltensweisen (Gesichtsausdruck, Körperhaltung etc.) werden bewertet."},
+    {q:"Was beschreibt das WHO-Schmerzschema?",x:"",o:["Stufenschema mit 3 Stufen zur medikamentösen Schmerztherapie (Nicht-Opioide → schwache Opioide → starke Opioide)","Bewertungssystem für Schmerzen","Chirurgisches Verfahren","Pflegassessmentinstrument"],c:0,e:"WHO-Stufenschema (1986): Stufe 1 = Nicht-Opioide, Stufe 2 = schwache Opioide ± Nicht-Opioid, Stufe 3 = starke Opioide ± Nicht-Opioid. Bei starken Schmerzen direkt auf Stufe 3."},
+    {q:"Was ist ein Tracheostoma und warum wird es angelegt?",x:"",o:["Künstlicher Magenausgang","Operative Öffnung in der Luftröhre zur Sicherung der Atemwege bei Langzeitbeatmung oder Atemwegsverlegung","Magensonde","Nierenkatheter"],c:1,e:"Tracheostoma: chirurgisch angelegte Öffnung in der Luftröhre. Indikationen: Langzeitbeatmung, Atemwegsverlegung, schwere neurologische Erkrankungen. Pflege: Kanüle, Absaugen, Befeuchtung, Stomapflege."},
+    {q:"Was sind die Krisenarten nach Cullberg?",x:"",o:["Es gibt nur eine Krisenart","Traumatische Krisen (akutes Ereignis) und Veränderungskrisen (Entwicklung) mit Phasen: Schock → Reaktion → Bearbeitung → Neuorientierung","Krisen enden immer in Heilung","Krisen brauchen keine Begleitung"],c:1,e:"Cullberg: Traumatische Krisen (plötzliches Ereignis) und Entwicklungskrisen (Lebensübergänge). Phasen: 1. Schockphase, 2. Reaktionsphase, 3. Bearbeitungsphase, 4. Neuorientierung."},
+    {q:"Was ist eine PEG-Sonde und was sind Pflegeaspekte?",x:"",o:["Nasensonde zur Kurzzeiternährung","Perkutan endoskopisch gelegte Magensonde zur Langzeiternährung – Eintrittsstelle täglich inspizieren, spülen, Lage kontrollieren","Intravenöse Ernährungssonde","Ableitungssonde"],c:1,e:"PEG: Langzeiternährung durch Bauchdecke. Pflege: tägliche Inspektion auf Infektionszeichen, Scheibenrotation, Spülung vor/nach Nutzung, Lage-/Ballonkontrolle, Dokumentation."}
+  ],
+  sandkastenliebe:[
+    {q:"Was ist ein Apoplex und welche Symptome zeigt das FAST-Schema?",x:"",o:["Herzerkrankung","Plötzliche Durchblutungsstörung des Gehirns: Face (Gesichtsschiefe), Arm (Schwäche), Speech (Sprache), Time (Notruf 112)","Lungenerkrankung","Krampfanfall"],c:1,e:"FAST: Face = Gesichtsschiefe, Arm = einseitige Schwäche, Speech = Sprachstörung, Time = sofort 112. Ursachen: Ischämie (80%) oder Hämorrhagie (20%). Lysetherapie innerhalb 4,5h."},
+    {q:"Was ist Person-zentrierte Pflege bei Demenz nach Tom Kitwood?",x:"",o:["Verhaltensauffälligkeiten durch Medikamente reduzieren","Ansatz, der die Person mit Demenz als vollwertigen Menschen respektiert und Würde, Identität, Wohlbefinden ins Zentrum stellt","Rein aktivierende Pflegeform","Gedächtnistraining"],c:1,e:"Kitwood (Person-Centred Care, 1997): VIPS-Modell: Values (Wertschätzung), Individualized care, Perspective (Perspektive der Person), Social environment. Person mit Demenz = vollwertig."},
+    {q:"Frau Kaufmann wird aggressiv wenn ihr Mann sie berührt. Was könnte die Ursache sein?",x:"",o:["Sie mag ihren Mann nicht mehr","Aggression kann Ausdruck von Angst, Schmerz oder Überforderung sein – Demenz verändert die Kommunikation","Sie ist eingebildet","Sie braucht stärkere Medikamente"],c:1,e:"Aggressives Verhalten bei Demenz = Ausdruck von Bedürfnissen: Schmerz, Angst, Überforderung, Würdeverletzung. Analyse: was geschah vorher? Maßnahmen: ruhige Umgebung, Validation, Biografie."},
+    {q:"Herr Kaufmann hatte einen Sturz. Was gehört zur systematischen Wundbeobachtung?",x:"",o:["Nur die Größe","Lokalisation, Größe, Tiefe, Rand, Umgebung, Exsudat (Menge/Farbe/Geruch), Infektionszeichen, Granulation","Nur ob es blutet","Nur das Datum"],c:1,e:"Wundbeobachtung (TIME/MEASURE): Lokalisation, Ausdehnung, Rand, Umgebung, Exsudat, Infektionszeichen (Rötung, Schwellung, Wärme, Schmerz), Granulationsgrad. Wunddokumentation mit Foto."},
+    {q:"Warum ist Sturzprophylaxe bei Herrn Kaufmann (91 J.) besonders wichtig?",x:"",o:["Nur in der Klinik wichtig","Ältere haben erhöhtes Sturzrisiko durch Gleichgewichtsstörungen, Muskelschwäche, Medikamente, Demenz – Folgen können lebensbedrohlich sein","Stürze bei Alten sind normal","Nur Aufgabe der Physiotherapie"],c:1,e:"Sturzrisiko steigt mit Alter. Folgen: Hüftfraktur, Immobilität, Pflegebedürftigkeit, Tod. Maßnahmen: Risikoerfassung (Morse Scale), Hilfsmittel, Umgebungsanpassung, Kraft-/Gleichgewichtstraining."}
+  ],
+  klara:[
+    {q:"Was ist ein ethisches Dilemma in der Pflege?",x:"",o:["Technisches Problem","Situation, in der zwei moralisch gleichwertige aber unvereinbare Handlungsoptionen vorliegen","Konflikt zwischen Kollegen","Rechtsfrage"],c:1,e:"Ethisches Dilemma: zwei Werte kollidieren (z.B. Autonomie vs. Fürsorge). Lösung: Ethische Fallbesprechung, Prinzipien nach Beauchamp & Childress, Kasuistik."},
+    {q:"Was ist die Pflege-Charta?",x:"",o:["Gehaltsreglement","Charta der Rechte pflegebedürftiger Menschen – sichert Würde, Selbstbestimmung, Privatheit (8 Artikel, BMFSFJ 2003)","Interne Krankenhausrichtlinie","Ausbildungsvertrag"],c:1,e:"Pflege-Charta: 8 Artikel zu Rechten pflegebedürftiger Menschen. Kernthemen: Würde, Selbstbestimmung, Privatsphäre, Rehabilitation, Teilhabe, spirituelle Begleitung."},
+    {q:"Was beschreibt die Konfliktanalyse im Team?",x:"",o:["Analyse von Pflegefehlern","Strukturiertes Verfahren zur Identifikation von Konfliktursachen, Beteiligten und Lösungsoptionen","Mitarbeiterbewertung","Verfahren zur Personalbeurteilung"],c:1,e:"Konfliktanalyse: Konfliktart bestimmen (Sach-, Beziehungs-, Rollen-, Wertekonflikt), Beteiligte identifizieren, Eskalationsstufe (Glasl), Lösungsoptionen entwickeln."},
+    {q:"Was bedeutet elterliches Sorgerecht im medizinischen Kontext?",x:"",o:["Eltern dürfen alles bis 18 entscheiden","Eltern entscheiden bei Minderjährigen – begrenzt durch das Kindeswohl","Pflegende entscheiden allein","Ärzte entscheiden ohne Eltern"],c:1,e:"Eltern mit Sorgerecht entscheiden über medizinische Maßnahmen bei Minderjährigen. Grenze: das Kindeswohl (§ 1666 BGB). Zunehmendem Reifegrad entsprechend werden Wünsche des Jugendlichen berücksichtigt."},
+    {q:"Wie verhält man sich bei sozialen Konflikten im Pflegeteam professionell?",x:"",o:["Konflikte ignorieren","Sofort Vorgesetzte ohne Gespräch informieren","Direkt und respektvoll ansprechen, Ich-Botschaften, aktives Zuhören, ggf. Supervision oder Mediation","Kollegen bei Patienten kritisieren"],c:2,e:"Professioneller Umgang: Konflikte zeitnah direkt ansprechen, Ich-Botschaften statt Vorwürfe, aktives Zuhören, gemeinsam Lösungen suchen. Bei Eskalation: Führungskraft, Mediation, Supervision."}
+  ],
+  sander:[
+    {q:"Was sind Parkinson-Kardinalsymptome?",x:"",o:["Gedächtnisverlust und Verwirrtheit","Akinese (Bewegungsarmut), Rigor (Steifheit), Ruhetremor, posturale Instabilität","Lähmung aller Extremitäten","Sehverlust und Kopfschmerzen"],c:1,e:"Parkinson-Kardinalsymptome: 1. Akinese/Bradykinese, 2. Rigor, 3. Ruhetremor, 4. Posturale Instabilität. Ursache: Dopaminmangel in der Substantia nigra."},
+    {q:"Was ist die 6-R-Regel im Medikamentenmanagement?",x:"",o:["6 Regeln für die Dokumentation","Richtiger Patient, Medikament, Dosis, Weg (Route), Zeitpunkt, Dokumentation","6 Schritte der Pflegeplanung","Regeln für den Umgang mit BtM"],c:1,e:"6-R-Regel: Richtiger Patient · Richtiges Medikament · Richtige Dosis · Richtiger Weg (Route) · Richtiger Zeitpunkt · Richtige Dokumentation. Medikationssicherheit."},
+    {q:"Wann beginnt Entlassungsmanagement?",x:"",o:["Am Tag der Entlassung","Nicht Aufgabe der Pflege","Möglichst früh nach Aufnahme","Nur bei chronisch kranken Patienten"],c:2,e:"DNQP-Expertenstandard: Entlassungsmanagement beginnt am Tag der Aufnahme: Entlassungsbedarf einschätzen, Patienten einbeziehen, externe Dienste koordinieren."},
+    {q:"Was fördert Resilienz bei Pflegenden?",x:"",o:["Mehr Überstunden machen","Alles alleine bewältigen","Soziale Unterstützung, positive Selbstwahrnehmung, Problemlösekompetenz, Pausen, Work-Life-Balance","Alle Probleme ignorieren"],c:2,e:"Resilienz = psychische Widerstandsfähigkeit. Fördernd: soziale Netzwerke, positive Emotionen, Selbstwirksamkeit, Stressbewältigung, Humor, Sinnhaftigkeit. Supervision und Teamgespräche helfen."},
+    {q:"Warum ist interprofessionelle Zusammenarbeit bei Herrn Sander wichtig?",x:"",o:["Nicht notwendig","Erhöht unnötig den Aufwand","Sichert ganzheitliche Versorgung: Arzt, Pflege, Physio, Sozialdienst, Ergo ergänzen sich und planen gemeinsam","Nur der Arzt entscheidet"],c:2,e:"Interprofessionell verbessert Ergebnisse, reduziert Fehler. Bei Parkinson: gemeinsame Zielplanung, regelmäßige Fallbesprechungen, SBAR-Kommunikation, klare Schnittstellenverantwortung."}
+  ],
+  patienten:[
+    {q:"Was ist MRSA und welche Maßnahmen sind nötig?",x:"",o:["Ein Antibiotikum","Methicillin-resistenter Staphylococcus aureus – antibiotikaresistente Bakterie: Isolation, Schutzkleidung, Desinfektion","Ein Virus","Eine Pilzinfektion"],c:1,e:"MRSA: resistenter Staphylococcus aureus. Maßnahmen: Einzelzimmer, Schutzkittel, Handschuhe, MNS, Händedesinfektion, Flächendesinfektion. Patienten informieren und psychisch unterstützen."},
+    {q:"Was regelt das Arbeitszeitgesetz (AZG)?",x:"",o:["Nur Urlaubsregelungen","Max. 8h/Tag (ausnahmsweise 10h), Pause nach 6h, 11h Ruhezeit zwischen Diensten, max. 48h/Woche","Nur das Gehalt","Nur die Weiterbildungspflicht"],c:1,e:"AZG: Max. 8h/Tag (bis 10h wenn Ausgleich), 30 Min. Pause nach 6h, mind. 11h Ruhezeit, max. 48h/Woche Durchschnitt. Pflegende sollten ihre Rechte kennen."},
+    {q:"Was bedeutet Pflegequalität nach Donabedian?",x:"",o:["Freundlichkeit der Pflegeperson","Strukturqualität (Ausstattung), Prozessqualität (Durchführung) und Ergebnisqualität (Pflegeergebnisse)","Nur die Schnelligkeit","Anzahl der Patienten pro Pflegekraft"],c:1,e:"Donabedians Qualitätsmodell: Strukturqualität (Personal, Ausstattung, Organisation), Prozessqualität (Pflegeprozess, Standards), Ergebnisqualität (Patientenzufriedenheit, Komplikationsraten)."},
+    {q:"Was versteht man unter Berufspolitik in der Pflege?",x:"",o:["Parteipolitik im Krankenhaus","Politisches Engagement für bessere Rahmenbedingungen, Professionalisierung und Anerkennung des Pflegeberufs","Internes Krankenhausmanagement","Dienstplanerstellung"],c:1,e:"Berufspolitik: Engagement in Berufsverbänden (DBfK, DPR), Mitwirkung an Gesetzgebung, Öffentlichkeitsarbeit, Weiterentwicklung von Standards, Einsatz für bessere Personalschlüssel."},
+    {q:"Was umfasst Standardhygiene in der Pflege?",x:"",o:["Nur das Tragen von Handschuhen","5-Momente-Händehygiene (WHO), Schutzkleidung, Entsorgung, Flächendesinfektion, aseptisches Arbeiten nach RKI-Empfehlungen","Nur Putzen","Nur Patientendusche"],c:1,e:"Standardhygiene gilt für ALLE Patienten: WHO 5-Momente-Händehygiene, Schutzkleidung, kontaminierte Materialien entsorgen, Flächendesinfektion. RKI-Empfehlungen und Hygienepläne sind verbindlich."}
+  ],
+  nika:[
+    {q:"Was ist Muskeldystrophie Duchenne und was ist pflegerisch wichtig?",x:"",o:["Nierenerkrankung","Genetische Muskelerkrankung mit progredientem Schwund – Beatmungsunterstützung, Mobilisation, Kontrakturprophylaxe, Atemtherapie essenziell","Erkrankung des Nervensystems","Herzerkrankung"],c:1,e:"Duchenne: X-chromosomal, fast ausschließlich Jungen. Progredienter Muskelschwund → Rollstuhlabhängigkeit, Ateminsuffizienz. Pflege: Atemtherapie, NIV/Tracheostoma, Kontrakturprophylaxe, Dekubitusprophylaxe."},
+    {q:"Was regelt das Infektionsschutzgesetz (IfSG)?",x:"",o:["Behandlung von Infektionskrankheiten","Meldepflichten bei bestimmten Infektionskrankheiten, Schutzmaßnahmen, Verhütung zum Schutz der Bevölkerung","Impfpflicht für Pflegende","Quarantäne bei jeder Erkältung"],c:1,e:"IfSG: Meldepflichten (Tuberkulose, EHEC, Masern, COVID-19), Tätigkeitsverbote, Schutzmaßnahmen. Krankenhäuser und Pflegeeinrichtungen haben besondere Meldepflichten ans Gesundheitsamt."},
+    {q:"Was ist beim endotrachealen Absaugen zu beachten?",x:"",o:["Keine besondere Vorbereitung nötig","Steriles Vorgehen, geeigneter Katheter, max. 15 Sek., O₂-Gabe vorher, SpO₂ und HF beobachten, dokumentieren","So oft absaugen wie möglich","Handschuhe reichen als Schutz"],c:1,e:"ETA: Indikation prüfen, sterile Handschuhe/Katheter, O₂-Vorgabe, max. 15 Sek., SpO₂/HF monitoren, Sekret dokumentieren (Farbe, Konsistenz). Komplikationen: Hypoxie, Herzrhythmusstörungen."},
+    {q:"Was bedeutet Immunsuppression für die Pflege?",x:"",o:["Stärkung des Immunsystems","Geschwächtes Immunsystem – erhöhte Infektionsgefahr erfordert konsequente Hygiene und Infektionsschutz","Eine Allergie","Eine Autoimmunerkrankung"],c:1,e:"Immunsuppression = geschwächtes Immunsystem (Erkrankung, Kortison, Chemotherapie). Maßnahmen: konsequente Händedesinfektion, Isolierung, Keimquellen meiden, Infektionszeichen früh erkennen."},
+    {q:"Warum ist das Thema Kindeswohlgefährdung bei Nika relevant?",x:"",o:["Wegen schulischer Probleme","Schwerstkranke Kinder sind besonders vulnerabel – ihr Wohl muss aktiv geschützt werden, auch ihr Selbstbestimmungsrecht","Weil ihre Eltern nachlässig sind","Wegen gefährlicher Aktivitäten"],c:1,e:"Nika hat das Recht auf Selbstbestimmung und Teilhabe. Kindeswohlgefährdung kann auch durch Überprotektion entstehen. Pflegende achten darauf, dass Nikes Wünsche respektiert werden."}
+  ],
+  einmalwar:[
+    {q:"Was ist eine Tracheotomie und welche Pflege braucht das Tracheostoma?",x:"",o:["Herzoperation","Chirurgische Öffnung der Luftröhre – Pflege: Kanülenpflege, Absaugen, Befeuchtung, Stomapflege","Augenoperation","Magenoperation"],c:1,e:"Tracheotomie: Luftröhrenschnitt zur Atemwegssicherung. Pflege: Absaugen, Kanülenwechsel, Befeuchtung, Stomarandpflege, Kanülenfixierung, ggf. Sprechventil."},
+    {q:"Was ist Qualitätsmanagement in der Pflege?",x:"",o:["Bewertung der Pflegepersonen","Systematisches Verfahren zur Sicherung und Verbesserung der Pflegequalität (Standards, Audits, Pflegeindikatoren, Beschwerdemanagement)","Nur ein Dokumentationssystem","Nur für Krankenhäuser"],c:1,e:"QM: Qualitätsstandards definieren, Prozesse standardisieren, interne Audits, externe Prüfungen (MDK), Pflegeindikatoren erfassen, Ergebnisse auswerten. Ziel: kontinuierliche Qualitätsverbesserung."},
+    {q:"Was bietet die ambulante Langzeitpflege?",x:"",o:["Nur Körperpflege","Körperpflege, Behandlungspflege, hauswirtschaftliche Versorgung, Beratungsbesuche, Pflegesachleistungen (SGB XI), Verhinderungspflege","Nur stationäre Versorgung","Nur medizinische Leistungen"],c:1,e:"Ambulante Pflegedienste: Grundpflege, Behandlungspflege (§ 37 SGB V), hauswirtschaftliche Hilfen, Beratungsbesuche (§ 37 Abs.3 SGB XI). Finanzierung über SGB XI und SGB V."},
+    {q:"Was bedeutet interprofessionelle Zusammenarbeit in der Kinderpflege?",x:"",o:["Nur Arzt und Pflege","Zusammenspiel von Pflege, Medizin, Therapie, Sozialdienst, Schule und Familie zur ganzheitlichen Versorgung","Pflegende arbeiten allein","Nur Eltern sind zuständig"],c:1,e:"Interprofessionell in der Kinderpflege: gemeinsame Ziele, regelmäßige Fallbesprechungen, Schnittstellenmanagement (Schule/Kita), Familie als Teammitglied. Alle teilen Dokumentation."},
+    {q:"Wie wird Pflege in Deutschland finanziert?",x:"",o:["Vollständig kostenlos","SGB XI (Pflegekassen), SGB V (Krankenversicherung), SGB XII (Sozialhilfe) und Eigenmittel","Nur durch den Staat","Pflegebedürftige zahlen alles selbst"],c:1,e:"Finanzierung: SGB XI = Pflegekassen (nach Pflegegrad). SGB V = Behandlungspflege. Eigenbeteiligung = Unterkunft/Verpflegung in Heimen. Bei Bedürftigkeit: SGB XII. Pflege ist eine Teilkaskoversicherung."}
+  ],
+  muell:[
+    {q:"Was ist das TIME-Konzept in der Wundversorgung?",x:"",o:["Ein einfaches Wundpflaster","Systematischer Ansatz: T=Tissue (Wundgrund), I=Infection/Inflammation, M=Moisture, E=Edge (Wundrand)","Chirurgisches Verfahren","Nur für chronische Wunden"],c:1,e:"TIME: T = Tissue (Debridement), I = Infection/Inflammation (Infektionskontrolle), M = Moisture balance (Feuchtigkeitsmanagement), E = Edge (Wundrandpflege). Systematische Versorgung verbessert Heilungsrate."},
+    {q:"Herr Johansson hat Diabetes Typ 2 und schlechte Blutzuckereinstellung. Welches Wundheilungsrisiko hat er?",x:"",o:["Kein Risiko","Erhöhtes Risiko durch Polyneuropathie, Mikro-/Makroangiopathie und geschwächtes Immunsystem","Verringertes Risiko","Nur wenn er Insulin spritzt"],c:1,e:"Diabetes erhöht Wundheilungsrisiko: Polyneuropathie (fehlende Schmerzwahrnehmung), Angiopathie (schlechte Durchblutung), Immunsuppression (Infektanfälligkeit). Regelmäßige Fußinspektion essenziell."},
+    {q:"Wie wird EBN in der Wundversorgung angewendet?",x:"",o:["Eigenblut-Nährsubstrat","Wundversorgung auf Basis aktueller Forschungsevidenz, Patientenpräferenzen und klinischer Expertise wählen","Ein Wundpflaster","Ein Verbandstandard"],c:1,e:"EBN in der Wundversorgung: Leitlinien (ICW, AWMF) konsultieren, systematische Reviews, Erfahrungswissen, Patientenpräferenzen. Feuchte Wundversorgung ist evidenzbasiert bei chronischen Wunden."},
+    {q:"Was ist wichtig beim Entlassungsmanagement mit komplexer Wundversorgung?",x:"",o:["Einfach nach Hause entlassen","Strukturierte Vorbereitung: ambulanten Wundversorger organisieren, schulen, Hilfsmittel beschaffen, Nachsorgetermine, Pflegedienst informieren","Patient organisiert selbst","Arzt macht Entlassung allein"],c:1,e:"Entlassungsmanagement: frühzeitig ambulante Wundversorgung (Pflegedienst/Wundexperte) organisieren, Wunddokumentation mitgeben, Patienten/Angehörige einweisen, Versorgungsmaterialien rezeptieren, Nachsorgetermine."},
+    {q:"Was ist 'professionelles Pflegehandeln'?",x:"",o:["Nach Gewohnheit allein handeln","Pflegeentscheidungen auf Basis von Forschungswissen, klinischer Expertise und Patientenwünschen treffen sowie das eigene Handeln kritisch reflektieren","Nur tun was der Arzt sagt","So schnell wie möglich arbeiten"],c:1,e:"Professionell: EBN + klinische Erfahrung + Patientenpräferenzen + Ethik. Selbstreflexion, Fehlerkultur und lebenslanges Lernen sind Merkmale professioneller Pflegepraxis."}
+  ],
+  fruehstueck:[
+    {q:"Was ist Amyotrophe Lateralsklerose (ALS)?",x:"",o:["Herzerkrankung","Progrediente neurodegenerative Erkrankung mit Untergang der Motoneuronen – zunehmender Muskelschwund und Lähmungen","Demenzerkrankung","Rückenmarkserkrankung"],c:1,e:"ALS: Degeneration oberer und unterer Motoneuronen. Symptome: Muskelschwund, Lähmungen, Schluck-/Sprachstörungen, Ateminsuffizienz. Kognition meist erhalten. Pflege: Atemtherapie, Tracheostoma, Kommunikationshilfen, PEG."},
+    {q:"Auszubildende Marie darf endotrachéal absaugen. Was gilt rechtlich?",x:"",o:["Auszubildende dürfen alles selbstständig","Auszubildende dürfen Vorbehaltsaufgaben nur unter Aufsicht – Praxisanleiterin ist verantwortlich","Keine Regeln für Auszubildende","Absaugen ist keine Vorbehaltsgabe"],c:1,e:"Vorbehaltstätigkeiten (§ 4 PflBG): nur examinierte Pflegefachkräfte eigenverantwortlich oder Auszubildende unter Aufsicht. Praxisanleitende verantworten Anleitung, Begleitung, Überwachung."},
+    {q:"Was bedeutet 'Nicht-Schaden' (non-maleficence) nach Beauchamp & Childress?",x:"",o:["Alles tun was dem Patienten nützt","Handlungen unterlassen, die dem Patienten schaden; bei unvermeidlichen Risiken: Nutzen-Risiko-Abwägung","Immer teurere Therapie wählen","Patientenwünsche ablehnen"],c:1,e:"Non-maleficence: Schadensvermeidung als ethisches Grundprinzip. In der Pflege: keine unnötig schmerzhaften Maßnahmen, Risikomanagement, korrekte Medikamentengabe, Fehlermeldekultur."},
+    {q:"Wofür sind Pflegende rechtlich verantwortlich?",x:"",o:["Für alles im Krankenhaus","Für ihr eigenverantwortliches Handeln: strafrechtlich, zivilrechtlich und berufsrechtlich","Nur Ärzte tragen Verantwortung","Pflegende haben keine Eigenverantwortung"],c:1,e:"Pflegende tragen eigenständige rechtliche Verantwortung: Strafrecht (§ 223 ff. StGB), Zivilrecht (Schadensersatz), Berufsrecht. Delegation begründet keine vollständige Verantwortungsabgabe."},
+    {q:"Was sind Prinzipien der Praxisanleitung (4-Stufen-Methode)?",x:"",o:["Auszubildende beobachten nur","Erläutern → Vormachen → Nachmachen lassen (begleitet) → selbstständig üben mit Reflexion","Auszubildende lernen nur durch Fehler","Praxisanleitung ist nicht geregelt"],c:1,e:"4-Stufen-Methode: 1. Erläutern (Vorgespräch), 2. Vormachen (Demonstration), 3. Nachmachen (begleitet), 4. Selbstständig üben + Nachbesprechung. Praxisanleitende müssen qualifiziert sein."}
+  ],
+  heisser:[
+    {q:"Welche Auswirkungen hat der Klimawandel auf Pflege?",x:"",o:["Keine Auswirkungen","Mehr Hitzewellen erhöhen Sterberisiko älterer Menschen; Pflegende müssen hitzebedingte Erkrankungen erkennen und präventiv handeln","Nur die Umwelt ist betroffen","Nur in Ländern mit Extremklima"],c:1,e:"Klimawandel & Pflege: Hitzewellen → erhöhte Mortalität bei Älteren/Chronischkranken (Dehydration, Kreislapskollaps). Maßnahmen: Flüssigkeitsversorgung, Kühlmaßnahmen, Medikamentenlagerung bei Hitze."},
+    {q:"Was ist kollegiale Beratung (Intervision)?",x:"",o:["Gespräch mit dem Vorgesetzten","Strukturierte Form der Selbstreflexion im Team ohne externe Leitung – Kollegen beraten sich gegenseitig","Supervision durch externe Fachkraft","Feedbackgespräch mit dem Patienten"],c:1,e:"Intervision: Kollegen beraten sich strukturiert (Fallgeberin, Beratergruppe, Moderator). Vorteile: kein Vorgesetzter, offene Atmosphäre, praxisnah. Fördert Reflexionsfähigkeit und Teamentwicklung."},
+    {q:"Wie arbeitet man professionell mit pflegenden Angehörigen?",x:"",o:["Angehörige aus der Pflege ausschließen","Als Partner einbeziehen: Ressourcen anerkennen, entlasten, informieren, schulen und psychisch unterstützen","Alle Pflege sollen Angehörige übernehmen","Angehörige haben keine Kompetenz"],c:1,e:"Pflegende Angehörige sind oft belastet. Professionell: Ressourcen anerkennen, bei Überforderung entlasten (Kurzzeitpflege, Schulung), emotionale Unterstützung, über Angebote informieren."},
+    {q:"Was beschreibt 'Pflege im gesellschaftlichen Wandel'?",x:"",o:["Pflege hat sich nicht verändert","Demographischer Wandel, Fachkräftemangel, Digitalisierung, Migration, veränderte Familienstrukturen und steigende Pflegebedürftigkeit prägen die Pflege","Pflege wird einfacher","Nur Technik verändert die Pflege"],c:1,e:"Gesellschaftlicher Wandel: mehr Pflegebedürftige, Fachkräftemangel, Akademisierung, Digitalisierung (Pflegeroboter, Telemedizin), kulturelle Vielfalt, veränderte Rollen- und Familienstrukturen."},
+    {q:"Was sind Hauptstressfaktoren in der Pflegearbeit?",x:"",o:["Nur schwierige Patienten","Zeitdruck, Personalmangel, emotionale Belastung, ethische Konflikte, körperliche Belastung, mangelnde Wertschätzung","Nur Nachtdienste","Nur Dokumentation"],c:1,e:"Berufsstress: Zeitdruck/Personalmangel, emotionale Belastung (Tod, Leid), körperliche Belastung, moralischer Distress, schlechte Work-Life-Balance. Betriebliche Gesundheitsförderung und Führungsverhalten mindern Stress."}
+  ],
+  koerper:[
+    {q:"Kai (18 J.) spritzt sich heimlich Insulin. Was ist der ethische Kern?",x:"",o:["Er darf das als Volljähriger ohne Einschränkung","Konflikt zwischen Autonomie (Selbstbestimmung) und Fürsorge/Nicht-Schaden","Er bricht nur eine Hausordnung","Rein medizinisches Problem"],c:1,e:"Ethischer Konflikt: Autonomieprinzip (Kai entscheidet über seinen Körper) vs. Fürsorge/Nicht-Schaden (falsche Insulingabe lebensgefährlich). Lösung: offenes respektvolles Gespräch, Risiken besprechen, gemeinsam Optionen suchen."},
+    {q:"Was ist Delegation in der Pflege?",x:"",o:["Alles selbst durchführen","Übertragung einer Aufgabe von der verantwortlichen Pflegekraft auf eine andere Person – mit Anleitung und Kontrolle","Aufgaben einfach abgeben","Nur Ärzte können delegieren"],c:1,e:"Delegation: examinierte Pflegefachkraft überträgt Aufgaben an Hilfskräfte/Auszubildende. Voraussetzungen: Aufgabe delegierbar, Person geeignet, Anleitung erfolgt, Kontrolle bleibt beim Delegierenden."},
+    {q:"Was bedeutet inter- und intraprofessionelles Handeln?",x:"",o:["Nur interne Teambesprechungen","Interprofessionell: Zusammenarbeit mit anderen Berufsgruppen. Intraprofessionell: Zusammenarbeit innerhalb der Pflegeberufe","Nur Arztaufgaben","Pflege arbeitet allein"],c:1,e:"Interprofessionell: Pflege + Medizin + Psychologie + Sozialdienst + Therapie. Intraprofessionell: Pflegefachkräfte + Helfer + Azubis koordinieren sich. Beide verbessern Versorgungsqualität."},
+    {q:"Was sind ethische Reflexionsprozesse in schwierigen Pflegesituationen?",x:"",o:["Intuitives Entscheiden","Strukturierte Auseinandersetzung: Situationserfassung, Werteabwägung, Prinzipienabwägung (Beauchamp & Childress), Konsensfindung im Team","Arztentscheidung abwarten","Alles mit dem Patienten allein besprechen"],c:1,e:"Ethische Reflexion: Situation beschreiben, Beteiligte identifizieren, Werte erfassen, Optionen abwägen, Konsequenzen bedenken, Entscheidung im Team/mit Patient. Ethikkomitees unterstützen."},
+    {q:"Was ist Kindeswohlgefährdung bei einem 18-Jährigen?",x:"",o:["Mit 18 gibt es das nicht mehr","Kindeswohlgefährdung gilt bis 18 Jahre; mit 18 ist Kai volljährig – sein Selbstbestimmungsrecht gilt vollständig","Eltern bestimmen bis 21","Nur bei Kleinkindern"],c:1,e:"Kindeswohlgefährdung (legal): gilt für Minderjährige bis 18. Kai ist 18 = volljährig → Selbstbestimmungsrecht vollständig. Keine Zwangsmaßnahmen; Aufklärung und Motivation statt Kontrolle."}
+  ],
+  konrad:[
+    {q:"Wie geht man professionell mit Alkohol im Pflegeheim um?",x:"",o:["Alkohol grundsätzlich verboten","Maßvoller Genuss kann akzeptiert sein; bei Missbrauch: empathisch ansprechen, Arzt einbeziehen, kein Moralisieren","Immer so viel wie gewünscht","Nicht Aufgabe der Pflege"],c:1,e:"Professioneller Umgang: individuelle Abwägung (Lebensqualität vs. Gesundheit), bewertungsfreie Haltung, Hausarzt einbeziehen, bei Abhängigkeit: Beratung und Suchtberatung anbieten, keine Zwangsmaßnahmen."},
+    {q:"Was regelt gesetzliche Betreuung nach § 1896 BGB?",x:"",o:["Freiwillige Familienunterstützung","Gerichtlich angeordnete Unterstützung für Personen, die ihre Angelegenheiten nicht mehr regeln können – Betreuer handelt im Interesse der Person","Zwangsunterbringung","Entmündigung"],c:1,e:"§ 1896 BGB: keine Entmündigung! Betreuer handelt im Wohl der betreuten Person, nicht gegen ihren Willen. Selbstbestimmung bleibt erhalten, soweit möglich."},
+    {q:"Welches ethische Prinzip ist bei Herrn Konrads Bier-Wunsch am relevantesten?",x:"",o:["Non-maleficence: Trinken verboten","Autonomie: Herr Konrad hat das Recht, solche Entscheidungen selbst zu treffen","Gerechtigkeit: alle müssen gleich behandelt werden","Benefizienz: maximales Wohlbefinden herstellen"],c:1,e:"Autonomieprinzip: Herr Konrad hat das Recht über sein eigenes Leben zu entscheiden – auch wenn es nicht optimal gesund ist. Voraussetzung: Einwilligungsfähigkeit. Pflege informiert und berät, bevormundet nicht."},
+    {q:"Was fördert professionelle Konfliktbewältigung im Team?",x:"",o:["Konflikte ignorieren","Direktes Ansprechen, Ich-Botschaften, aktives Zuhören, gemeinsam Lösungen suchen, Mediation bei Eskalation","Immer Vorgesetzte einschalten","Kollegen öffentlich kritisieren"],c:1,e:"Konfliktbewältigung: frühes Intervenieren, direkt und respektvoll ansprechen, Ich-Botschaften, aktives Zuhören, Lösungen suchen. Bei Eskalation: Führungskraft, Mediation oder Supervision."},
+    {q:"Was bedeutet persönliche Gesunderhaltung für Pflegende?",x:"",o:["Nur Schutzkleidung tragen","Aktive Maßnahmen für eigene physische und psychische Gesundheit: Ergonomie, Stressmanagement, Bewegung, Pausen, soziale Kontakte, gesunde Ernährung","Nur Arbeitszeiten einhalten","Nur Händewaschen"],c:1,e:"Gesunderhaltung in der Pflege: körperlich (Ergonomie, Impfungen, Schlaf), psychisch (Stressmanagement, Supervision, Pausen, Abgrenzung), sozial (Kollegenunterstützung, Hobbys). Resilienz schützt vor Burnout."}
+  ],
+  team:[
+    {q:"Was bedeutet SGB XI für die Pflege?",x:"",o:["Nur Krankenversicherung","Definiert Pflegegrade, Leistungsansprüche und Finanzierung der Pflegeversicherung in Deutschland","Tarifvertrag","Regelt Ausbildung"],c:1,e:"SGB XI: Pflegegrade 1–5, Leistungsbeträge (Geld- und Sachleistungen), MDK/Medicproof-Begutachtung, Finanzierung durch Pflichtbeiträge. Teilkaskoversicherung."},
+    {q:"Was umfasst interne und externe Qualitätsprüfung?",x:"",o:["Nur interne Leitungsprüfungen","Intern: Audits, Fallbesprechungen, Mitarbeiterbefragungen. Extern: MDK-Prüfungen (§ 114 SGB XI), Heimaufsicht, Zertifizierungen","Nur externe Behördenprüfungen","Nicht vorgeschrieben"],c:1,e:"Interne QS: Pflegevisiten, Mitarbeiterbefragungen, interne Audits. Externe QS: MDK/Medicproof (§ 114 SGB XI), Heimaufsicht, Zertifizierungen (ISO, KTQ). Ergebnisse werden veröffentlicht."},
+    {q:"Was sind die Phasen der Teamentwicklung nach Tuckman?",x:"",o:["Planen, Durchführen, Evaluieren, Verbessern","Forming, Storming, Norming, Performing","Kennenlernen, Arbeiten, Abschließen","Einarbeitung, Training, Kontrolle"],c:1,e:"Tuckman: 1. Forming (Kennenlernen), 2. Storming (Konflikte), 3. Norming (Regeln entstehen), 4. Performing (effektive Zusammenarbeit). Führungskräfte und Praxisanleitende begleiten diesen Prozess."},
+    {q:"Was bedeutet 'lebenslanges Lernen' in der Pflege?",x:"",o:["Nur in der Ausbildung lernen","Kontinuierliche Fortbildung und Weiterentwicklung über die gesamte Berufsbiografie – Pflicht nach PflBG (ca. 48h/Jahr)","Fortbildung ist freiwillig","Man lernt nur durch Fehler"],c:1,e:"Lebenslanges Lernen (PflBG): Pflicht zur Fortbildung ca. 48h/Jahr. Formen: interne Schulungen, externe Fortbildungen, Fachtagungen, Selbststudium, E-Learning. Ziel: Fachkompetenz aktuell halten."},
+    {q:"Was sind Prinzipien professioneller Einarbeitung?",x:"",o:["Neue müssen alles selbst herausfinden","Strukturierte Einarbeitung: Orientierung, schrittweise Aufgabenübernahme, feste Ansprechperson (Mentor), regelmäßige Feedbackgespräche nach Einarbeitungsplan","Einarbeitung dauert einen Tag","Sofort alle Aufgaben selbstständig"],c:1,e:"Professionelle Einarbeitung: Einarbeitungsplan, feste Ansprechperson (Mentor/Praxisanleitende), Orientierungsphase, schrittweise Aufgabenübernahme, Feedback nach 1, 3 und 6 Monaten."}
+  ],
+  dorf:[
+    {q:"Was ist rheumatoide Arthritis?",x:"",o:["Verschleißerkrankung","Chronisch-entzündliche Autoimmunerkrankung mit symmetrischer Gelenkentzündung, Morgensteifigkeit, Schwellung, Schmerzen","Rückenerkrankung","Akute Gelenkinfektion"],c:1,e:"RA: Autoimmunerkrankung mit synovialer Entzündung. Symmetrische Gelenkentzündung (Finger, Handgelenke, Knie), Morgensteifigkeit >60 Min., systemische Zeichen. Therapie: Methotrexat, Biologika, Physiotherapie."},
+    {q:"Was fordert der Expertenstandard Schmerzmanagement?",x:"",o:["Schmerzen müssen ertragen werden","Regelmäßiges Schmerzassessment, individuelle Therapie, Patientenedukation, Evaluation nach Forschungsevidenz","Nur Arztaufgabe","Schmerzmittel immer auf Anfrage"],c:1,e:"DNQP Schmerzmanagement: initiales Assessment, regelmäßige Verlaufskontrollen, multimodales Management (medikamentös + nicht-medikamentös), Patientenschulung, Outcome-Messung."},
+    {q:"Warum ist interprofessionelle Zusammenarbeit auf dem Land besonders wichtig?",x:"",o:["Auf dem Land nicht vorhanden","Dünne Versorgungsstruktur macht enge Vernetzung von Pflegedienst, Hausarzt, Physio, Sozialdienst und Angehörigen besonders notwendig","Nur Krankenhäuser arbeiten interprofessionell","Nur in der Klinik sinnvoll"],c:1,e:"Ländliche Regionen: weniger Fachärzte, längere Wege → Vernetzung essenziell: regelmäßige Fallbesprechungen, klare Kommunikationswege, Telemedizin, Case-Management."},
+    {q:"Menut bemerkt, dass Frau Seidels Schmerzen nicht ernst genommen werden. Was tut er?",x:"",o:["Er sagt nichts, da er neu ist","Er spricht die Stationsleitung an – das ist Teil des professionellen Pflegehandelns (Advocacy)","Er gibt selbst Schmerzmittel","Er verlegt die Patientin"],c:1,e:"Professionelles Handeln: Advocacy = Patientenanwaltschaft ist Berufsauftrag. Beobachtung sachlich dokumentieren, ansprechen, ggf. institutionelle Meldewege nutzen. Schweigen ist keine Option."},
+    {q:"Was umfasst gesellschaftliche Entwicklung als Thema für Pflegende?",x:"",o:["Nur Zeitungslesen","Kenntnisse über demographischen Wandel, Fachkräftemangel, Digitalisierung, kulturelle Vielfalt, Gesundheitspolitik und ihre Auswirkungen auf Pflege","Nur politische Diskussionen","Nur Wirtschaftsfragen"],c:1,e:"Gesellschaftliche Entwicklung: demographischer Wandel, Fachkräftemangel, Digitalisierung, kulturelle Vielfalt, Gesundheitspolitik (Pflegebonusgesetz, Personalbemessung), Pflege im ländlichen Raum."}
+  ],
+  prob:[
+    {q:"Was hilft wenn man Lernstoff einfach nicht behalten kann?",x:"",o:["Aufgeben","Aktive Methoden: Karteikarten, erklären ohne Vorlage, Mind-Maps, Lerngruppen, spaced repetition","Denselben Text immer wieder lesen","Nur Zusammenfassungen schreiben"],c:1,e:"Passives Wiederlesen ist wenig effektiv. Aktive Methoden: Karteikarten (aktiver Abruf), Elaboration (Stoff erklären), spaced repetition, Lerngruppen. Kurze regelmäßige Einheiten > Marathon."},
+    {q:"Was tun bei Motivationslosigkeit?",x:"",o:["Einfach durchhalten ohne Pause","Kleine Ziele setzen, Erfolge feiern, Lernort wechseln, Lernpartnerschaften, den Sinn reflektieren, ggf. professionelle Hilfe","Sofort aufhören zu lernen","Mehr Kaffee trinken"],c:1,e:"Strategien: kleine erreichbare Tagesziele, Belohnungssysteme, Lernort-/Methodenwechsel, mit Kommilitonen lernen, eigenes 'Warum' reflektieren. Bei anhaltender Demotivation: Beratung suchen."},
+    {q:"Was ist ein Blackout in der Prüfung?",x:"",o:["Technisches Problem","Plötzliches Aussetzen des Wissensabrufs durch Stress – hilft: tief atmen, leichtere Frage beginnen, Körper beruhigen","Echtes Vergessen","Zeichen zu wenig gelernt zu haben"],c:1,e:"Blackout = blockierter Abruf durch Angst/Stress. Strategien: tief atmen (Parasympathikus), Körper lockern, mit bekannter Frage beginnen, Zeitdruck mental reduzieren. Das Wissen ist da – nur blockiert."},
+    {q:"Was tun wenn wenig Zeit zur Prüfung bleibt?",x:"",o:["Nichts – zu spät","Priorisieren: wichtige Themen zuerst, Aufgabentypen üben, früh schlafen gehen vor der Prüfung","Die ganze Nacht durchlernen","Nur Karteikarten anschauen"],c:1,e:"Bei Zeitdruck: Pareto-Prinzip (20% des Stoffs → 80% der Prüfungsinhalte). Prioritäten setzen, aktiv üben, mindestens 7–8h Schlaf. Nachtlernen ist kontraproduktiv – Schlaf festigt Gedächtnis."},
+    {q:"Was tun wenn die Prüfung nicht bestanden wurde?",x:"",o:["Ausbildung sofort abbrechen","Ergebnis analysieren, Beratung suchen, Wiederholungsmöglichkeit nutzen, gezielt an Schwachstellen arbeiten","Sich schämen","Note ignorieren"],c:1,e:"Nicht bestehen = Information, kein Versagen. Schritte: Prüfungsprotokoll analysieren, Feedback einholen, Schwachstellen identifizieren, Wiederholungsplan erstellen, Schulberatung nutzen."}
+  ],
+  selbst:[
+    {q:"Warum ist Schlaf in der Prüfungsphase so wichtig?",x:"",o:["Zeitverschwendung","Im Schlaf werden Gedächtnisinhalte konsolidiert – 7–8h verbessern Konzentration, Abruf und emotionale Stabilität","Mehr Schlaf = weniger Lernzeit","Nur am Tag vor der Prüfung"],c:1,e:"Schlaf essentiell für Lernen: Im Tiefschlaf werden Tagesinhalte ins Langzeitgedächtnis übertragen. Schlafentzug mindert Konzentration, Kreativität, Merkfähigkeit. Regelmäßiger Rhythmus ist Lernstrategie."},
+    {q:"Was ist Work-Life-Balance für Auszubildende?",x:"",o:["Immer nur lernen","Ausgewogene Balance zwischen Lernen und Erholung, sozialen Kontakten, Hobbys – schützt vor Burnout und fördert Leistungsfähigkeit","Nur für Vollzeitberufstätige","Auszubildende haben keine Freizeit"],c:1,e:"Work-Life-Balance: Lernzeiten planen, bewusste Erholungsphasen, Hobbys und soziale Kontakte pflegen, Grenzen ziehen. Langfristig hält gute Balance Motivation aufrecht und verhindert Erschöpfung."},
+    {q:"Warum ist Flüssigkeit beim Lernen wichtig?",x:"",o:["Nicht wichtig","Dehydration mindert Konzentrations- und Denkfähigkeit – mind. 1,5–2 Liter täglich, besser Wasser oder ungesüßter Tee","Man soll viel Kaffee trinken","Nur bei Sport wichtig"],c:1,e:"Bereits 2% Flüssigkeitsmangel beeinträchtigt kognitive Leistung (Konzentration, Kurzzeit-Gedächtnis). Empfehlung: 1,5–2L täglich. Wasser/ungesüßter Tee bevorzugen. Kaffee in Maßen."},
+    {q:"Was sind sinnvolle Entspannungsmethoden?",x:"",o:["Kein Entspannen – nur lernen","Progressive Muskelentspannung, Atemübungen, Spaziergänge, Yoga, Achtsamkeit, Sport – Pausen verbessern die Lernleistung","Entspannung ist Schwäche","Nur Schlafen ist Entspannung"],c:1,e:"Entspannungsmethoden: PMR, Bauchatmung, MBSR, kurze Naturpausen, Sport. Pomodoro-Technik: 25 Min. lernen, 5 Min. Pause. Regelmäßige Pausen steigern die Gesamtlerneffizienz."},
+    {q:"Was verstärkt Prüfungsangst und was hilft?",x:"",o:["Gute Vorbereitung verstärkt Angst","Katastrophisierung, Vergleiche, Schlafmangel, mangelnde Vorbereitung verstärken Angst – helfen: realistische Gedanken, Atemtechniken, Vorbereitung, Gespräche","Pausen verstärken Angst","Immer krankhaft"],c:1,e:"Prüfungsangst: normal. Verstärkend: Katastrophengedanken, Vergleiche, Schlafentzug. Hilfreich: kognitive Umstrukturierung, Atemübungen, realistische Erwartungen, Austausch mit Gleichgesinnten."}
+  ],
+  ptag:[
+    {q:"Was am Prüfungstag morgens besonders beachten?",x:"",o:["Viel essen und trinken","Leichte sättigende Mahlzeit, pünktlich erscheinen, alle Materialien dabei, ruhig und fokussiert ankommen","Kurz vorher intensiv lernen","Kaffee und nichts essen"],c:1,e:"Prüfungstag: leichte Mahlzeit (Hafer, Vollkorn), ausreichend Wasser, alle Unterlagen vorher packen, 15 Min. früher da. Kein Intensivlernen kurz vorher. Bewusst tief einatmen, positive Selbstgespräche."},
+    {q:"Wie liest man eine Prüfungsaufgabe am besten?",x:"",o:["Nur einmal flüchtig lesen","Zweimal lesen, Operator markieren, Punktzahl beachten, Schlüsselwörter unterstreichen, dann planvoll antworten","Sofort mit Schreiben beginnen","Nur den letzten Satz lesen"],c:1,e:"Aufgabenanalyse: 1. Operator identifizieren (nennen, beschreiben, ermitteln?), 2. Inhalt erfassen, 3. Punktzahl beachten, 4. Schlüsselwörter unterstreichen, 5. Antwort gliedern. Spart Zeit und sichert Vollständigkeit."},
+    {q:"Was ist der Unterschied zwischen 'nennen' und 'beschreiben'?",x:"",o:["Kein Unterschied","Nennen = kurze Auflistung ohne Erklärung (AB I); Beschreiben = ausführliche Darstellung mit Merkmalen (AB II)","Nennen = ausführlich; Beschreiben = kurze Liste","Beide fordern persönliche Meinung"],c:1,e:"NENNEN (AB I) = kurze Liste, keine Begründung. BESCHREIBEN (AB II) = ausführlich mit Merkmalen. ERKLÄREN (AB II) = mit Begründung. STELLUNG BEZIEHEN (AB III) = eigene begründete Meinung (mit 'Ich')."},
+    {q:"Was bedeutet 'Nachkontrolle' vor der Abgabe?",x:"",o:["Alle Antworten neu schreiben","Kurz vor Abgabe: Vollständigkeit prüfen, Namen eingetragen, Lesbarkeit, keine offensichtlichen Lücken","Schlechteste Antworten streichen","10x lesen"],c:1,e:"Nachkontrolle (5–10 Min.): Alle Aufgaben beantwortet? Name/Datum? Lesbar? Fachbegriffe verwendet? Tipp: erste Antwort behalten – spontane Antworten sind oft richtiger als 'überkorrigierte'."},
+    {q:"Wie teilt man die Zeit in der Prüfung ein?",x:"",o:["Alles auf eine Aufgabe","Punkte proportional verteilen (1P ≈ 1 Min.), mit bekannten Aufgaben beginnen, bei schwierigen weitergehen und zurückkehren","Immer schwierigste zuerst","Zeit spielt keine Rolle"],c:1,e:"Zeitmanagement: 1P ≈ 1 Min. Gesamtzeit proportional verteilen. Mit Bekanntem beginnen (Erfolgserlebnis). Bei schwierigen Aufgaben: weitermachen, zurückkehren. 5–10 Min. für Nachkontrolle einplanen."}
+  ],
+  k1_k:[
+    {q:"Welche 5 Kompetenzbereiche strukturieren die Pflegeausbildung nach PflBG?",x:"",o:["KB I: Pflegeprozess, KB II: Kommunikation, KB III: Organisation/Management, KB IV: Gesellschaft, KB V: Professionalität","KB I: Anatomie, KB II: Pharmakologie, KB III: Chirurgie, KB IV: Psychologie, KB V: Ethik","KB I: Körperpflege, KB II: Mobilisation, KB III: Ernährung, KB IV: Ausscheidung, KB V: Schlafen","KB I: Pädiatrie, KB II: Geriatrie, KB III: Chirurgie, KB IV: Neurologie, KB V: Psychiatrie"],c:0,e:"KB I: Pflegeprozess und -wissen, KB II: Kommunikation und Beziehung, KB III: Organisation/Management/Personal, KB IV: Gesellschaft/Recht/Ethik, KB V: Professionalität/Eigenständigkeit."},
+    {q:"Was prüft der Anforderungsbereich III (AB III)?",x:"",o:["Reines Wiedergeben von Fakten","Verstehen und Anwenden von Wissen","Urteilen, Bewerten und Begründen von Sachverhalten auf Basis von Fachkompetenz","Auswendiglernen von Definitionen"],c:2,e:"AB I = Reproduktion (Fakten nennen), AB II = Anwendung (Zusammenhänge erklären), AB III = Transfer/Wertung (beurteilen, Stellung beziehen, begründen). 3. Prüfungstag hat mehr AB III."},
+    {q:"Was sind Vorbehaltstätigkeiten nach § 4 PflBG?",x:"",o:["Alle Tätigkeiten in der Pflege","Spezifische Tätigkeiten (Pflegeprozess, Anleitung, Pflegediagnostik, Evaluation) nur von examinierten Pflegefachkräften eigenverantwortlich","Nur das Injizieren von Medikamenten","Tätigkeiten die an Ärzte vorbehalten sind"],c:1,e:"Vorbehaltstätigkeiten (§ 4 PflBG): Pflegeprozess gestalten, Pflegediagnostik, Pflegeplanung, Anleitung von Auszubildenden. Diese dürfen nur examinierte Pflegefachkräfte eigenverantwortlich durchführen."},
+    {q:"Was bedeutet Eigenverantwortlichkeit nach PflBG?",x:"",o:["Man tut was man möchte","Pflegefachkräfte handeln auf Basis ihrer Fachkompetenz, wissenschaftlich fundiert und rechtlich/ethisch eigenständig verantwortlich","Man befolgt nur Arztanweisungen","Man ist nie verantwortlich"],c:1,e:"Eigenverantwortlichkeit (§ 3 PflBG): Pflegefachkräfte sind kompetente Fachpersonen mit eigener Verantwortung für Pflegeprozess, Sicherheit und Qualität. Grundlage: wissenschaftliche Ausbildung."},
+    {q:"Was ist der Unterschied zwischen Pflegegrad und Pflegebedürftigkeit?",x:"",o:["Sie bedeuten dasselbe","Pflegebedürftigkeit = dauerhafter Hilfebedarf; Pflegegrad = administrativer Bewertungswert 1–5 nach NBA-Begutachtung","Pflegegrad nur für Krankenhäuser","Pflegebedürftigkeit erst ab PG 3"],c:1,e:"Pflegebedürftigkeit (§ 14 SGB XI): dauerhafter Hilfebedarf. Pflegegrad: Begutachtungsergebnis (0–100 Punkte → PG 1–5). PG 1 = geringe Beeinträchtigung, PG 5 = schwerste mit besonderem Bedarf."}
+  ],
+  k1_o:[
+    {q:"Der Operator 'ERMITTELN' erfordert welchen Arbeitsschritt?",x:"",o:["Nur Fakten aufzählen","Sachverhalt durch Analyse oder Vergleich aus Informationen herausarbeiten (AB II)","Persönliche Meinung","Begriff definieren"],c:1,e:"ERMITTELN (AB II): Informationen analysieren und daraus ableiten. 'Ermitteln Sie das Dekubitusrisiko anhand der Waterlow-Skala.' Methode: Fakt aus dem Fall → Schlussfolgerung → Ergebnis."},
+    {q:"Welcher Operator gehört dem Anforderungsbereich I (AB I) an?",x:"",o:["Erklären","Entwickeln","Stellung nehmen","Nennen"],c:3,e:"AB I-Operatoren: NENNEN, AUFZÄHLEN, DEFINIEREN – reines Wiedergeben ohne Begründung. AB II: Beschreiben, Ermitteln, Zuordnen. AB III: Erklären, Entwickeln, Stellung beziehen."},
+    {q:"Was bedeutet 'STELLUNG BEZIEHEN' als Operator?",x:"",o:["Fakten aufzählen","Pflegesituation zusammenfassen","Begründete eigene Meinung zu einem Sachverhalt formulieren, gestützt auf Fachwissen und Ethik (AB III)","Begriff definieren"],c:2,e:"STELLUNG BEZIEHEN (AB III): eigene, begründete Position. Struktur: Ich finde/Ich bin der Meinung + Begründung (weil + Fachbegriff) + Fallbezug. Keine Meinung ohne Fachbegründung."},
+    {q:"Was verlangt der Operator 'ENTWICKELN'?",x:"",o:["Plan kreativ und begründet aus einer Situation erarbeiten (AB III)","Fakten nennen","Begriff erklären","Informationen sammeln"],c:0,e:"ENTWICKELN (AB III): neue Ideen, Pläne, Maßnahmen oder Lösungen auf Basis des Falls erarbeiten. Begründete, fallbezogene, fachlich fundierte Planung – nicht nur aufgelistete Maßnahmen."},
+    {q:"Was bedeuten Anforderungsbereiche (AB)?",x:"",o:["Format der Prüfungsarbeit","Schwierigkeitsstufe: AB I = Reproduktion, AB II = Reorganisation, AB III = Transfer/Wertung","Anzahl der Punkte","Anzahl der Aufgaben"],c:1,e:"AB I = Fakten reproduzieren, AB II = Verstehen und Anwenden, AB III = Beurteilen und Transferieren. Prüfungsaufgaben markieren den jeweiligen AB im Aufgabentext."}
+  ],
+  k1_p:[
+    {q:"Aus welchen 3 Teilen besteht die Abschlussprüfung?",x:"",o:["Schriftlich, Mündlich, Praktisch","Theoretisch, Praktisch, Klinisch","Schriftlich, Klinisch, Mündlich","Fachlich, Sozial, Persönlich"],c:0,e:"Abschlussprüfung (PflBG): 1. Schriftliche Prüfung (3 Prüfungstage), 2. Mündliche Prüfung (Fall + Prüfergespräch), 3. Praktische Prüfung (reale Pflegesituation). Alle 3 Teile müssen bestanden werden."},
+    {q:"Wie viele Tage umfasst die schriftliche Prüfung?",x:"",o:["1 Tag","2 Tage","3 Tage","5 Tage"],c:2,e:"Die schriftliche Prüfung erstreckt sich über 3 Prüfungstage mit je einer fallbezogenen Aufgabe (120 Min.). Jeder Tag hat eine andere thematische Ausrichtung."},
+    {q:"Wofür steht KB V in der Pflegeausbildung?",x:"",o:["Körperpflege und Vitalzeichen","Professionalität, Selbstreflexion, berufliche Entwicklung und Eigenständigkeit","Kommunikation und Visiten","Klinische Befunde"],c:1,e:"KB V = Professionelles Handeln, Selbstreflexion, berufliche Identität, ethisches Handeln, Eigenständigkeit. Themen: Berufspolitik, lebenslanges Lernen, persönliche Gesunderhaltung, Reflexionsfähigkeit."},
+    {q:"Was wird in der praktischen Abschlussprüfung bewertet?",x:"",o:["Theoretisches Wissen","Pflegepraxis mit realen Patienten: Pflegeprozess planen, durchführen, evaluieren","Pflegedokumentation schreiben","Rechenfragen lösen"],c:1,e:"Praktische Prüfung: an realen Patienten wird der gesamte Pflegeprozess geprüft. Bewertet: Pflegeanamnese/-planung, Durchführung (Fertigkeiten, Kommunikation, Hygiene), Dokumentation, Fachgespräch."},
+    {q:"Was bedeutet 'Kompetenzschwerpunkt' in einer Prüfungsaufgabe?",x:"",o:["Hauptthema des Buches","Kompetenzbereich (KB), dem eine Prüfungsaufgabe schwerpunktmäßig zugeordnet ist","Anzahl der Punkte","Art des Operators"],c:1,e:"Prüfungsaufgaben sind einem oder mehreren KB zugeordnet. Der Kompetenzschwerpunkt zeigt, welche Kompetenzen bewertet werden. Oft werden mehrere KB verknüpft – typisch: ANWENDEN im Vordergrund."}
+  ],
+  k1_l:[
+    {q:"Was ist die Pomodoro-Technik?",x:"",o:["Italienisches Lernbuch","Zeitmanagement: 25 Min. fokussiert lernen, 5 Min. Pause – nach 4 Runden längere Pause","Ernährungsempfehlung","Entspannungsverfahren"],c:1,e:"Pomodoro: 25 Min. fokussiert (Ablenkungen ausschalten) → 5 Min. Pause. Nach 4 Pomodori: 15–30 Min. längere Pause. Verhindert geistige Erschöpfung, nutzt den Flow-Zustand."},
+    {q:"Warum ist 'Selbsterklären' eine effektive Lernmethode?",x:"",o:["Es dauert zu lange","Wenn man etwas erklären kann, hat man es wirklich verstanden – Lücken werden sichtbar","Nur für Lehrer wichtig","Ersetzt alle anderen Methoden"],c:1,e:"Explain-to-yourself: Stoff laut erklären ohne Vorlage zeigt Verständnislücken sofort. Aktiver Abruf stärkt neuronale Netzwerke besser als passives Lesen. Als 'Teach-back' mit Lernpartner sehr effektiv."},
+    {q:"Was ist ein persönlicher Lernplan?",x:"",o:["To-do-Liste für den Schultag","Strukturierte Übersicht über Lernziele, Zeitpläne und Themen zur Selbstorganisation der Prüfungsvorbereitung","Stundenplan der Schule","Notenprotokoll"],c:1,e:"Lernplan: Prüfungstermine eingetragen, Themen priorisiert, Lernziele definiert, realistische Zeiten mit Puffern. Dient der Selbstorganisation, verhindert Lernstau und gibt Sicherheit."},
+    {q:"Was kann bei Prüfungsangst helfen?",x:"",o:["Alles vermeiden was an Prüfung erinnert","Gute Vorbereitung, realistische Selbsteinschätzung, Atemübungen, positive Selbstgespräche, Austausch, ggf. professionelle Unterstützung","Mehr Koffein","Prüfung ignorieren"],c:1,e:"Prüfungsangst-Management: gute Vorbereitung (reduziert Unsicherheit), kognitive Umstrukturierung, Atemübungen (4-7-8-Technik), PMR, Austausch mit Kommilitonen. Bei starker Angst: Schulberatung."},
+    {q:"Warum ist Pausenmachen beim Lernen wichtig?",x:"",o:["Verlangsamt das Lernen","Gehirn konsolidiert Informationen auch in Ruhephasen – ohne Pausen sinkt Konzentration und steigt Fehlerrate","Nur Faulpelze machen Pausen","Pausen mind. 2 Stunden"],c:1,e:"Pausen sind notwendig: In Ruhephasen konsolidiert das Gehirn neue Informationen ('offline learning'). Konzentration sinkt nach 25–50 Min. Regelmäßige kurze Pausen erhöhen Gesamtleistung."}
+  ]
+};
+
+/* ============================
+   STORAGE
+   ============================ */
+const KEY='pflegias_v2';
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}
+function save(d){try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
+
+function getProgress(){return load();}
+function saveTopicResult(id,score,total){
+  const d=load();
+  if(!d[id])d[id]={best:0,attempts:0,lastDate:'',totalCorrect:0,totalAnswered:0};
+  const wasNewBest=score>d[id].best;
+  d[id].best=Math.max(d[id].best,score);
+  d[id].attempts=(d[id].attempts||0)+1;
+  d[id].lastDate=new Date().toISOString().slice(0,10);
+  d[id].totalCorrect=(d[id].totalCorrect||0)+score;
+  d[id].totalAnswered=(d[id].totalAnswered||0)+total;
+  // Streak
+  const today=new Date().toISOString().slice(0,10);
+  const yd=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(d._lastActive===today){/* same day */}
+  else if(d._lastActive===yd){d._streak=(d._streak||0)+1;}
+  else{d._streak=1;}
+  d._lastActive=today;
+  save(d);
+  return wasNewBest;
+}
+function resetAll(){if(confirm('Wirklich alles zurücksetzen?')){localStorage.removeItem(KEY);renderHome();showToast('Fortschritt zurückgesetzt');}}
+
+/* ============================
+   EXPORT / IMPORT
+   ============================ */
+function exportProgress(){
+  const d=load();
+  const allTopics=CH.flatMap(c=>c.groups.flatMap(g=>g.topics));
+  const done=allTopics.filter(t=>d[t.id]&&d[t.id].best>=3).length;
+  const payload={
+    version:2,
+    exportDate:new Date().toISOString().slice(0,10),
+    streak:d._streak||0,
+    topicsDone:done,
+    progress:d
+  };
+  const json=JSON.stringify(payload,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='pflegias_fortschritt_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✅ Fortschritt exportiert!');
+}
+
+function importFile(input){
+  const file=input.files[0];
+  if(!file){return;}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const parsed=JSON.parse(e.target.result);
+      // accept both raw progress object and wrapped export format
+      const data=parsed.progress||parsed;
+      if(typeof data!=='object'||Array.isArray(data)){
+        throw new Error('Ungültiges Format');
+      }
+      // merge with existing (keep best scores)
+      const existing=load();
+      const allTopics=CH.flatMap(c=>c.groups.flatMap(g=>g.topics));
+      const topicIds=new Set(allTopics.map(t=>t.id));
+      const merged={...existing};
+      Object.keys(data).forEach(k=>{
+        if(k.startsWith('_')){
+          // meta fields: keep higher streak
+          if(k==='_streak') merged._streak=Math.max(existing._streak||0,data[k]||0);
+          else merged[k]=data[k];
+        } else if(topicIds.has(k)){
+          // topic data: merge keeping best scores
+          if(!merged[k]){
+            merged[k]=data[k];
+          } else {
+            merged[k]={
+              best:Math.max(merged[k].best||0,data[k].best||0),
+              attempts:(merged[k].attempts||0)+(data[k].attempts||0),
+              lastDate:merged[k].lastDate>data[k].lastDate?merged[k].lastDate:data[k].lastDate,
+              totalCorrect:(merged[k].totalCorrect||0)+(data[k].totalCorrect||0),
+              totalAnswered:(merged[k].totalAnswered||0)+(data[k].totalAnswered||0),
+            };
+          }
+        }
+      });
+      save(merged);
+      renderHome();
+      showToast('✅ Fortschritt importiert & zusammengeführt!');
+    } catch(err){
+      showToast('❌ Fehler beim Importieren: '+err.message);
+    }
+    // reset input so same file can be selected again
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function showToast(msg,dur=2800){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+/* ============================
+   ROUTING
+   ============================ */
+let curCh=null,curTopic=null,qs=[],qi=0,ans=[],sel=null,revealed=false;
+function go(id,fn){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  if(fn)fn();
+}
+
+/* ============================
+   HOME
+   ============================ */
+function renderHome(){
+  const prog=getProgress();
+  const allTopics=CH.flatMap(c=>c.groups.flatMap(g=>g.topics));
+  const totalTopics=allTopics.length;
+  const done=allTopics.filter(t=>prog[t.id]&&prog[t.id].best>=3).length;
+  const totalCorrect=allTopics.reduce((s,t)=>s+(prog[t.id]?.totalCorrect||0),0);
+  const streak=prog._streak||0;
+  document.getElementById('stat-done').textContent=done;
+  document.getElementById('stat-total').textContent=totalTopics;
+  document.getElementById('stat-correct').textContent=totalCorrect;
+  document.getElementById('stat-streak').textContent=streak+'🔥';
+  const pct=Math.round((done/totalTopics)*100);
+  const circ=263.9;
+  document.getElementById('ring-fg').style.strokeDashoffset=circ-(circ*pct/100);
+  document.getElementById('ring-pct').textContent=pct+'%';
+
+  const container=document.getElementById('home-chapters');
+  container.innerHTML='<div class="sec">Kapitel wählen</div>';
+  const cards=document.createElement('div');cards.className='cards';
+  CH.forEach(ch=>{
+    const chTopics=ch.groups.flatMap(g=>g.topics);
+    const chDone=chTopics.filter(t=>prog[t.id]&&prog[t.id].best>=3).length;
+    const chPct=Math.round((chDone/chTopics.length)*100);
+    const card=document.createElement('div');card.className='ch-card';
+    card.innerHTML=`
+      <div class="ch-top">
+        <div class="ch-dot ${ch.cls}">${ch.emoji}</div>
+        <div class="ch-info">
+          <div class="ch-title">${ch.label}</div>
+          <div class="ch-sub">${ch.sub} · ${chDone}/${chTopics.length} abgeschlossen</div>
+        </div>
+        <div class="ch-arr">›</div>
+      </div>
+      <div class="ch-prog"><div class="ch-progfill" style="width:${chPct}%"></div></div>`;
+    card.onclick=()=>showTopics(ch);
+    cards.appendChild(card);
+  });
+  container.appendChild(cards);
+  // show install banner if not standalone
+  if(!window.navigator.standalone&&!window.matchMedia('(display-mode: standalone)').matches){
+    document.getElementById('install-banner').classList.add('show');
+  }
+}
+
+/* ============================
+   TOPICS
+   ============================ */
+function showTopics(ch){
+  curCh=ch;
+  document.getElementById('top-title').textContent=ch.label;
+  document.getElementById('top-sub').textContent=ch.sub;
+  const prog=getProgress();
+  const body=document.getElementById('topics-body');body.innerHTML='';
+  ch.groups.forEach(g=>{
+    const gt=document.createElement('div');gt.className='topic-group';gt.textContent=g.name;
+    body.appendChild(gt);
+    const tl=document.createElement('div');tl.className='tlist';
+    g.topics.forEach(t=>{
+      const p=prog[t.id];const best=p?.best||0;const attempts=p?.attempts||0;
+      const total=(DB[t.id]||[]).length||5;
+      const pctBest=best&&total?Math.round((best/total)*100):0;
+      let cls='none',lbl='–';
+      if(best>=total){cls='perfect';lbl='⭐ '+best+'/'+total;}
+      else if(best>=Math.ceil(total*0.6)){cls='good';lbl='👍 '+best+'/'+total;}
+      else if(best>0){cls='poor';lbl=best+'/'+total;}
+      const isDone=best>=3;
+      const tc=document.createElement('div');tc.className='tc';
+      tc.innerHTML=`
+        <div class="t-ico">${t.emoji}</div>
+        <div class="t-info">
+          <div class="t-title">${t.title}</div>
+          <div class="t-themes">${t.themes}</div>
+        </div>
+        <div class="t-badge">
+          <div class="tbest ${cls}">${lbl}</div>
+          <div class="t-check ${isDone?'done':'undone'}">${isDone?'✓':'○'}</div>
+        </div>`;
+      tc.onclick=()=>startQuiz(t);
+      tl.appendChild(tc);
+    });
+    body.appendChild(tl);
+  });
+  go('s-topics');
+}
+
+/* ============================
+   QUIZ
+   ============================ */
+function shuffle(a){let ar=[...a];for(let i=ar.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ar[i],ar[j]]=[ar[j],ar[i]];}return ar;}
+
+function startQuiz(topic){
+  curTopic=topic;
+  const raw=DB[topic.id]||[];
+  if(!raw.length){alert('Keine Fragen für dieses Thema.');return;}
+  qs=shuffle(raw);qi=0;ans=[];
+  document.getElementById('quiz-title').textContent=topic.title;
+  document.getElementById('quiz-sub').textContent=topic.themes.split(' · ').slice(0,2).join(' · ');
+  document.getElementById('pf').style.width='0%';
+  go('s-quiz');
+  renderQ();
+}
+function exitQuiz(){curCh?showTopics(curCh):go('s-home',renderHome);}
+
+function renderQ(){
+  const q=qs[qi];sel=null;revealed=false;
+  document.getElementById('pf').style.width=(qi/qs.length*100)+'%';
+  const shuffled=shuffle(q.o.map((t,i)=>({t,orig:i})));
+  const corNew=shuffled.findIndex(o=>o.orig===q.c);
+  const body=document.getElementById('quiz-body');
+  body.innerHTML=`
+    <div class="q-no">Frage ${qi+1} von ${qs.length}</div>
+    ${q.x?`<div class="q-ctx">${q.x}</div>`:''}
+    <div class="q-txt">${q.q}</div>
+    <div class="opts" id="oc">
+      ${shuffled.map((o,i)=>`
+        <button class="op" onclick="pick(this,${i},${corNew})">
+          <span class="ol">${'ABCD'[i]}</span>
+          <span class="ot">${o.t}</span>
+        </button>`).join('')}
+    </div>
+    <div class="reveal" id="rv">
+      <div class="rev-lbl" id="rl"></div>
+      <div class="rev-exp" id="re"></div>
+    </div>
+    <div class="q-actions">
+      <button class="btn" id="cb" onclick="confirm_(${corNew},${JSON.stringify(qs[qi].e).replace(/</g,'&lt;')})" disabled>Antwort bestätigen</button>
+    </div>`;
+  body.scrollTop=0;
+}
+
+function pick(el,i,correct){
+  if(revealed)return;sel=i;
+  document.querySelectorAll('.op').forEach((e,j)=>e.classList.toggle('sel',j===i));
+  document.getElementById('cb').disabled=false;
+}
+
+window._confData={};
+function confirm_(correct,expJson){
+  if(sel===null||revealed)return;revealed=true;
+  const exp=expJson;
+  const ok=sel===correct;
+  const opts=document.querySelectorAll('.op');
+  const selTxt=opts[sel].querySelector('.ot').textContent;
+  const corTxt=opts[correct].querySelector('.ot').textContent;
+  ans.push({q:qs[qi].q,ok,selTxt,corTxt,exp});
+  opts.forEach((e,i)=>{
+    e.classList.remove('sel');
+    if(i===correct)e.classList.add(ok&&i===sel?'cor':'rcor');
+    if(i===sel&&!ok)e.classList.add('wrg');
+  });
+  const rv=document.getElementById('rv');rv.classList.add('vis');
+  const rl=document.getElementById('rl');const re=document.getElementById('re');
+  rl.className='rev-lbl '+(ok?'c':'w');
+  rl.textContent=ok?'✓ Richtig!':'✗ Falsch – Richtig: '+corTxt;
+  re.textContent=exp;
+  const cb=document.getElementById('cb');cb.disabled=false;
+  const last=qi===qs.length-1;
+  cb.textContent=last?'Ergebnis ansehen →':'Nächste Frage →';
+  cb.onclick=last?showResults:()=>{qi++;renderQ();};
+}
+
+/* ============================
+   RESULTS
+   ============================ */
+function showResults(){
+  const total=qs.length;const score=ans.filter(a=>a.ok).length;
+  const pct=Math.round((score/total)*100);
+  const isNewBest=saveTopicResult(curTopic.id,score,total);
+  document.getElementById('r-score').textContent=score;
+  document.getElementById('r-of').textContent='von '+total;
+  document.getElementById('r-newbest').style.display=isNewBest?'inline-block':'none';
+  const[t,m]=pct>=80?['⭐ Ausgezeichnet!','Du bist bereit für die Prüfung!']:
+              pct>=60?['👍 Gut gemacht!','Noch ein paar Wiederholungen!']:
+                      ['📖 Weiter üben!','Schau dir die Erklärungen an.'];
+  document.getElementById('r-title').textContent=t;
+  document.getElementById('r-msg').textContent=m;
+  document.getElementById('res-review').innerHTML=ans.map((a,i)=>`
+    <div class="ri">
+      <div class="ri-badge ${a.ok?'c':'w'}">${a.ok?'✓ Richtig':'✗ Falsch'}</div>
+      <div class="ri-q">F${i+1}: ${a.q}</div>
+      <div class="ri-a">
+        ${!a.ok?`<span style="color:#DC2626">Deine Antwort: ${a.selTxt}</span><br>`:''}
+        <span style="color:#2A7A38">Richtig: ${a.corTxt}</span><br><br>
+        <span>${a.exp}</span>
+      </div>
+    </div>`).join('');
+  document.getElementById('r-retry').onclick=()=>startQuiz(curTopic);
+  go('s-results');
+}
+
+/* ============================
+   INIT
+   ============================ */
+renderHome();
+</script>
+</body>
+</html>
